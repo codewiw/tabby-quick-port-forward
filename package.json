@@ -1,0 +1,71 @@
+{
+    "name": "tabby-quick-port-forward",
+    "version": "1.0.0",
+    "description": "Quick SSH Port Forwarding with presets and service icons for Tabby",
+    "keywords": [
+        "tabby-plugin",
+        "ssh",
+        "port-forwarding",
+        "tunnel",
+        "presets"
+    ],
+    "author": "Willian",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "typings": "typings/index.d.ts",
+    "scripts": {
+        "build": "webpack --progress --color",
+        "watch": "webpack --watch --progress --color"
+    },
+    "files": [
+        "dist",
+        "typings",
+        "presets.json",
+        "README.md"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/codewiw/tabby-quick-port-forward.git"
+    },
+    "peerDependencies": {
+        "@angular/animations": "^14.0.0 || ^15.0.0",
+        "@angular/common": "^14.0.0 || ^15.0.0",
+        "@angular/core": "^14.0.0 || ^15.0.0",
+        "@angular/forms": "^14.0.0 || ^15.0.0",
+        "@angular/platform-browser": "^14.0.0 || ^15.0.0",
+        "rxjs": "^7.5.0",
+        "tabby-core": "*",
+        "tabby-settings": "*",
+        "tabby-terminal": "*"
+    },
+    "devDependencies": {
+        "@angular/animations": "^14.0.0",
+        "@angular/cdk": "^14.0.0",
+        "@angular/common": "^14.0.0",
+        "@angular/compiler": "^14.0.0",
+        "@angular/compiler-cli": "^14.0.0",
+        "@angular/core": "^14.0.0",
+        "@angular/forms": "^14.0.0",
+        "@angular/platform-browser": "^14.0.0",
+        "@angular/platform-browser-dynamic": "^14.0.0",
+        "@ng-bootstrap/ng-bootstrap": "^14.0.0",
+        "@popperjs/core": "^2.11.6",
+        "@types/node": "^16.0.0",
+        "css-loader": "^6.7.0",
+        "ngx-toastr": "^15.2.2",
+        "rxjs": "^7.5.0",
+        "sass": "^1.56.0",
+        "sass-loader": "^13.2.0",
+        "tabby-core": "latest",
+        "tabby-settings": "latest",
+        "tabby-terminal": "latest",
+        "to-string-loader": "^1.2.0",
+        "ts-loader": "^9.0.0",
+        "typescript": "^4.7.0",
+        "webpack": "^5.0.0",
+        "webpack-cli": "^4.0.0"
+    },
+    "dependencies": {
+        "tabby-server-stats": "file:../Server Stats"
+    }
+}
