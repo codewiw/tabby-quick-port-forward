@@ -22,7 +22,8 @@
     "dist",
     "typings",
     "presets.json",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
