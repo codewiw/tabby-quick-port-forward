@@ -44,21 +44,27 @@ export default class QuickPortForwardModule {
         forwardService: QuickPortForwardService,
         config: ConfigService,
     ) {
-        // Safe translation loading: wait for config.ready$ and do NOT overwrite Tabby's configured language
-        config.ready$.subscribe(() => {
-            setTimeout(() => {
-                try {
-                    for (const [lang, trans] of Object.entries(TRANSLATIONS)) {
-                        translate.setTranslation(lang, trans, true)
-                    }
-                    // Re-apply user's configured language (e.g. pt-BR) so Tabby NEVER resets to English!
-                    if (config.store?.language) {
-                        translate.use(config.store.language)
-                    }
-                } catch (e) {
-                    console.error('[QuickPortForward] Translation init error:', e)
+        const applyTranslations = () => {
+            try {
+                for (const [lang, trans] of Object.entries(TRANSLATIONS)) {
+                    translate.setTranslation(lang, trans, true)
                 }
-            }, 1000)
+                const activeLang = config.store?.language || 'en-US'
+                translate.use(activeLang)
+            } catch (e) {
+                console.error('[QuickPortForward] Translation init error:', e)
+            }
+        }
+
+        // Apply on config ready with safety timeout
+        config.ready$.subscribe(() => {
+            setTimeout(applyTranslations, 1000)
+        })
+
+        // Also update immediately if user changes language in Tabby Settings
+        config.changed$.subscribe(() => {
+            const activeLang = config.store?.language || 'en-US'
+            translate.use(activeLang)
         })
 
         const openEnhancedModal = (session: any) => {
