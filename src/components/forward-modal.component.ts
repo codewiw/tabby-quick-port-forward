@@ -155,11 +155,21 @@ import { PortForwardPreset } from '../types'
             <!-- TAB 2: ADICIONAR TÚNEL                         -->
             <!-- ============================================== -->
             <div *ngIf="activeTab === 'add'">
-                <!-- Clean Catalog Select Dropdown -->
+                <!-- Clean Catalog Select Dropdown with Sync Button -->
                 <div class="mb-3" *ngIf="catalogPresets.length > 0">
-                    <label class="form-label small fw-bold">Preencher a partir do Catálogo Oficial:</label>
-                    <select class="form-select form-select-sm" (change)="onCatalogDropdownChange($event)">
-                        <option value="">Escolher serviço predefinido (PostgreSQL, MySQL, Redis, MongoDB, Docker, Nginx, Grafana...)...</option>
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label small fw-bold mb-0">Preencher a partir do Catálogo Oficial:</label>
+                        <button type="button" 
+                                class="btn btn-sm btn-link text-decoration-none py-0 px-1 text-muted" 
+                                (click)="refreshCatalogFromGitHub()" 
+                                [disabled]="loadingCatalog"
+                                title="Buscar atualizações de serviços do GitHub">
+                            <i class="fas fa-sync-alt me-1" [class.fa-spin]="loadingCatalog"></i>
+                            <small>{{ loadingCatalog ? 'Atualizando...' : 'Atualizar do GitHub' }}</small>
+                        </button>
+                    </div>
+                    <select class="form-select form-select-sm" [(ngModel)]="selectedCatalogId" (ngModelChange)="onCatalogDropdownChange($event)">
+                        <option value="">Escolher serviço predefinido ({{ catalogPresets.length }} disponíveis)...</option>
                         <option *ngFor="let item of catalogPresets" [value]="item.id">
                             {{ item.name }} (Porta padrão: {{ item.localPort }})
                         </option>
@@ -391,6 +401,8 @@ export class QuickPortForwardModalComponent implements OnInit {
     busyPresets = new Set<string>()
     catalogPresets: PortForwardPreset[] = []
     PortForwardType = PortForwardType
+    selectedCatalogId = ''
+    loadingCatalog = false
 
     // Edit State
     isEditing = false
@@ -423,7 +435,7 @@ export class QuickPortForwardModalComponent implements OnInit {
             this.session = this.forwardService.getActiveSSHSession()
         }
         try {
-            this.catalogPresets = await this.forwardService.fetchPresetsFromGitHub()
+            this.catalogPresets = await this.forwardService.getCatalogPresets()
         } catch {}
 
         if (this.presets.length === 0 && this.activeForwards.length === 0) {
@@ -541,8 +553,7 @@ export class QuickPortForwardModalComponent implements OnInit {
         }
     }
 
-    onCatalogDropdownChange(event: any): void {
-        const id = event.target.value
+    onCatalogDropdownChange(id: string): void {
         if (!id) return
         const item = this.catalogPresets.find(p => p.id === id)
         if (item) {
@@ -559,7 +570,19 @@ export class QuickPortForwardModalComponent implements OnInit {
             this.addFontAwesome = ''
             this.toastr.info(`Serviço ${item.name} selecionado.`)
         }
-        event.target.value = ''
+    }
+
+    async refreshCatalogFromGitHub(): Promise<void> {
+        this.loadingCatalog = true
+        try {
+            this.catalogPresets = await this.forwardService.fetchPresetsFromGitHub()
+            this.toastr.success(`Catálogo atualizado! ${this.catalogPresets.length} serviços disponíveis.`)
+        } catch (err: any) {
+            this.toastr.error(`Falha ao atualizar do GitHub: ${err.message || err}`)
+        } finally {
+            this.loadingCatalog = false
+            this.cdr.detectChanges()
+        }
     }
 
     deletePreset(preset: PortForwardPreset): void {
@@ -644,6 +667,7 @@ export class QuickPortForwardModalComponent implements OnInit {
             icon: 'fas fa-plug',
         }
         this.addFontAwesome = ''
+        this.selectedCatalogId = ''
         this.activeTab = 'tunnels'
     }
 

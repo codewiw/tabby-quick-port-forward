@@ -185,6 +185,28 @@ export class QuickPortForwardService {
         await session.addPortForward(fw)
     }
 
+    private cachedCatalog: PortForwardPreset[] | null = null
+
+    async getCatalogPresets(forceRefresh = false): Promise<PortForwardPreset[]> {
+        if (!forceRefresh && this.cachedCatalog && this.cachedCatalog.length > 0) {
+            return this.cachedCatalog
+        }
+
+        // 1. Check local bundled presets for instantaneous zero-latency load
+        if (!forceRefresh) {
+            try {
+                const localPresets = require('../../presets.json')
+                if (Array.isArray(localPresets) && localPresets.length > 0) {
+                    this.cachedCatalog = localPresets
+                    return localPresets
+                }
+            } catch {}
+        }
+
+        // 2. Fetch from GitHub if forceRefresh or first time
+        return this.fetchPresetsFromGitHub()
+    }
+
     async fetchPresetsFromGitHub(customUrl?: string): Promise<PortForwardPreset[]> {
         const url = customUrl || this.config.store?.plugin?.quickPortForward?.presetsUrl || 'https://raw.githubusercontent.com/codewiw/tabby-quick-port-forward/main/presets.json'
         
@@ -192,13 +214,19 @@ export class QuickPortForwardService {
             const res = await fetch(url, { cache: 'no-cache' })
             if (!res.ok) throw new Error(`HTTP ${res.status}`)
             const data = await res.json()
-            if (Array.isArray(data)) return data
-            throw new Error('Invalid JSON format')
+            if (Array.isArray(data) && data.length > 0) {
+                this.cachedCatalog = data
+                return data
+            }
+            throw new Error('Formato JSON inválido')
         } catch (err) {
-            // Fallback to local presets.json if available
+            // Fallback to local presets.json
             try {
                 const localPresets = require('../../presets.json')
-                if (Array.isArray(localPresets)) return localPresets
+                if (Array.isArray(localPresets) && localPresets.length > 0) {
+                    this.cachedCatalog = localPresets
+                    return localPresets
+                }
             } catch {}
             throw err
         }

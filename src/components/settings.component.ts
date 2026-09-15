@@ -43,9 +43,19 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
             <div class="card-body p-3">
                 <!-- Select from catalog if new -->
                 <div class="mb-3" *ngIf="isNewPreset && catalogPresets.length > 0">
-                    <label class="form-label small fw-bold text-light">Preencher a partir do Catálogo Oficial:</label>
-                    <select class="form-select form-select-sm" (change)="onCatalogSelect($event)">
-                        <option value="">Escolher serviço predefinido (PostgreSQL, MySQL, Redis, MongoDB, Docker, Nginx, Grafana...)...</option>
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label small fw-bold text-light mb-0">Preencher a partir do Catálogo Oficial:</label>
+                        <button type="button" 
+                                class="btn btn-sm btn-link text-decoration-none py-0 px-1 text-muted" 
+                                (click)="refreshCatalogFromGitHub()" 
+                                [disabled]="loadingCatalog"
+                                title="Buscar atualizações de serviços do GitHub">
+                            <i class="fas fa-sync-alt me-1" [class.fa-spin]="loadingCatalog"></i>
+                            <small>{{ loadingCatalog ? 'Atualizando...' : 'Atualizar do GitHub' }}</small>
+                        </button>
+                    </div>
+                    <select class="form-select form-select-sm" [(ngModel)]="selectedCatalogId" (ngModelChange)="onCatalogSelect($event)">
+                        <option value="">Escolher serviço predefinido ({{ catalogPresets.length }} disponíveis)...</option>
                         <option *ngFor="let item of catalogPresets" [value]="item.id">
                             {{ item.name }} (Porta padrão: {{ item.localPort }})
                         </option>
@@ -197,6 +207,8 @@ export class QuickPortForwardSettingsComponent implements OnInit {
     isNewPreset = false
     fontAwesomeInput = ''
     catalogPresets: PortForwardPreset[] = []
+    selectedCatalogId = ''
+    loadingCatalog = false
 
     constructor(
         public config: ConfigService,
@@ -206,7 +218,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         try {
-            this.catalogPresets = await this.forwardService.fetchPresetsFromGitHub()
+            this.catalogPresets = await this.forwardService.getCatalogPresets()
         } catch {}
     }
 
@@ -226,6 +238,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
 
     newPreset(): void {
         this.isNewPreset = true
+        this.selectedCatalogId = ''
         this.fontAwesomeInput = ''
         this.editingPreset = {
             id: Date.now().toString(),
@@ -240,8 +253,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
         }
     }
 
-    onCatalogSelect(event: any): void {
-        const id = event.target.value
+    onCatalogSelect(id: string): void {
         if (!id || !this.editingPreset) return
         const item = this.catalogPresets.find(p => p.id === id)
         if (item) {
@@ -254,8 +266,20 @@ export class QuickPortForwardSettingsComponent implements OnInit {
             this.editingPreset.description = item.description || ''
             this.editingPreset.icon = item.icon || 'fas fa-plug'
             this.fontAwesomeInput = ''
+            this.toastr.info(`Serviço ${item.name} selecionado.`)
         }
-        event.target.value = ''
+    }
+
+    async refreshCatalogFromGitHub(): Promise<void> {
+        this.loadingCatalog = true
+        try {
+            this.catalogPresets = await this.forwardService.fetchPresetsFromGitHub()
+            this.toastr.success(`Catálogo atualizado! ${this.catalogPresets.length} serviços disponíveis.`)
+        } catch (err: any) {
+            this.toastr.error(`Falha ao atualizar do GitHub: ${err.message || err}`)
+        } finally {
+            this.loadingCatalog = false
+        }
     }
 
     editPreset(preset: PortForwardPreset): void {
