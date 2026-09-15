@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule, NgbModal } from '@ng-bootstrap/ng-bootstrap'
-import { ToastrModule } from 'ngx-toastr'
 import TabbyCoreModule, { ConfigProvider, TranslateService, AppService, ConfigService } from 'tabby-core'
 import { SettingsTabProvider } from 'tabby-settings'
 
@@ -18,7 +17,6 @@ import { TRANSLATIONS } from './translations'
         CommonModule,
         FormsModule,
         NgbModule,
-        ToastrModule,
         TabbyCoreModule,
     ],
     declarations: [

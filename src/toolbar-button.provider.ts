@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core'
-import { ToolbarButtonProvider, ToolbarButton, TranslateService } from 'tabby-core'
+import { ToolbarButtonProvider, ToolbarButton, TranslateService, NotificationsService } from 'tabby-core'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
-import { ToastrService } from 'ngx-toastr'
 import { QuickPortForwardService } from './services/forward.service'
 import { QuickPortForwardModalComponent } from './components/forward-modal.component'
 
@@ -10,7 +9,7 @@ export class QuickPortForwardToolbarButtonProvider extends ToolbarButtonProvider
     constructor(
         private forwardService: QuickPortForwardService,
         private ngbModal: NgbModal,
-        private toastr: ToastrService,
+        private toastr: NotificationsService,
         private translate: TranslateService
     ) {
         super()

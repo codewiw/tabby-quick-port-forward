@@ -1,7 +1,6 @@
 import { Component, Injectable, OnInit } from '@angular/core'
-import { ConfigService, TranslateService } from 'tabby-core'
+import { ConfigService, TranslateService, NotificationsService } from 'tabby-core'
 import { SettingsTabProvider } from 'tabby-settings'
-import { ToastrService } from 'ngx-toastr'
 import { QuickPortForwardService } from '../services/forward.service'
 import { PortForwardPreset } from '../types'
 
@@ -213,7 +212,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
     constructor(
         public config: ConfigService,
         private forwardService: QuickPortForwardService,
-        private toastr: ToastrService,
+        private toastr: NotificationsService,
         private translate: TranslateService
     ) {}
 
@@ -275,7 +274,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
         this.loadingCatalog = true
         try {
             this.catalogPresets = await this.forwardService.fetchPresetsFromGitHub()
-            this.toastr.success(`${this.translate.instant('Catalog updated!')} ${this.catalogPresets.length} ${this.translate.instant('services available.')}`)
+            this.toastr.notice(`${this.translate.instant('Catalog updated!')} ${this.catalogPresets.length} ${this.translate.instant('services available.')}`)
         } catch (err: any) {
             this.toastr.error(`${this.translate.instant('Failed to update from GitHub:')} ${err.message || err}`)
         } finally {
@@ -311,11 +310,11 @@ export class QuickPortForwardSettingsComponent implements OnInit {
     saveEdit(): void {
         if (!this.editingPreset) return
         if (!this.editingPreset.name.trim()) {
-            this.toastr.warning(this.translate.instant('Please enter service name.'))
+            this.toastr.notice(this.translate.instant('Please enter service name.'))
             return
         }
         if (!this.editingPreset.localPort) {
-            this.toastr.warning(this.translate.instant('Please enter local port.'))
+            this.toastr.notice(this.translate.instant('Please enter local port.'))
             return
         }
 
@@ -328,7 +327,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
         }
 
         this.forwardService.savePresets(current)
-        this.toastr.success(this.translate.instant('Preset saved!'))
+        this.toastr.notice(this.translate.instant('Preset saved!'))
         this.cancelEdit()
     }
 
@@ -357,7 +356,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
             if (typeof content === 'string' && content.includes('<svg')) {
                 this.editingPreset!.icon = content.substring(content.indexOf('<svg'))
                 this.fontAwesomeInput = ''
-                this.toastr.success('SVG OK')
+                this.toastr.notice('SVG OK')
             } else {
                 this.editingPreset!.icon = content
                 this.fontAwesomeInput = ''
@@ -404,7 +403,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
                         }
                     }
                     this.forwardService.savePresets(current)
-                    this.toastr.success(`${count} ${this.translate.instant('Preset saved!')}`)
+                    this.toastr.notice(`${count} ${this.translate.instant('Preset saved!')}`)
                 }
             } catch {
                 this.toastr.error('JSON Error')

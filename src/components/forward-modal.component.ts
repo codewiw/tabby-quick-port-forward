@@ -1,7 +1,6 @@
 import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { ToastrService } from 'ngx-toastr'
-import { TranslateService } from 'tabby-core'
+import { TranslateService, NotificationsService } from 'tabby-core'
 import { QuickPortForwardService, PortForwardType, ForwardedPortConfig } from '../services/forward.service'
 import { PortForwardPreset } from '../types'
 
@@ -427,7 +426,7 @@ export class QuickPortForwardModalComponent implements OnInit {
     constructor(
         public activeModal: NgbActiveModal,
         private forwardService: QuickPortForwardService,
-        private toastr: ToastrService,
+        private toastr: NotificationsService,
         private translate: TranslateService,
         private cdr: ChangeDetectorRef
     ) {}
@@ -524,7 +523,7 @@ export class QuickPortForwardModalComponent implements OnInit {
 
     async togglePreset(preset: PortForwardPreset): Promise<void> {
         if (!this.session) {
-            this.toastr.warning(this.translate.instant('No active SSH session found.'))
+            this.toastr.notice(this.translate.instant('No active SSH session found.'))
             return
         }
         this.busyPresets.add(preset.id)
@@ -533,7 +532,7 @@ export class QuickPortForwardModalComponent implements OnInit {
         try {
             const started = await this.forwardService.togglePreset(this.session, preset)
             if (started) {
-                this.toastr.success(`${this.translate.instant('Tunnel started on port')} ${preset.localPort}`)
+                this.toastr.notice(`${this.translate.instant('Tunnel started on port')} ${preset.localPort}`)
             } else {
                 this.toastr.info(`${this.translate.instant('Tunnel stopped')}: ${preset.name}`)
             }
@@ -578,7 +577,7 @@ export class QuickPortForwardModalComponent implements OnInit {
         this.loadingCatalog = true
         try {
             this.catalogPresets = await this.forwardService.fetchPresetsFromGitHub()
-            this.toastr.success(`${this.translate.instant('Catalog updated!')} ${this.catalogPresets.length} ${this.translate.instant('services available.')}`)
+            this.toastr.notice(`${this.translate.instant('Catalog updated!')} ${this.catalogPresets.length} ${this.translate.instant('services available.')}`)
         } catch (err: any) {
             this.toastr.error(`${this.translate.instant('Failed to update from GitHub:')} ${err.message || err}`)
         } finally {
@@ -607,12 +606,12 @@ export class QuickPortForwardModalComponent implements OnInit {
                 targetForm.icon = cleanSvg
                 if (targetForm === this.addForm) this.addFontAwesome = ''
                 if (targetForm === this.editForm) this.editFontAwesome = ''
-                this.toastr.success('SVG OK')
+                this.toastr.notice('SVG OK')
             } else {
                 targetForm.icon = content
                 if (targetForm === this.addForm) this.addFontAwesome = ''
                 if (targetForm === this.editForm) this.editFontAwesome = ''
-                this.toastr.success('Image OK')
+                this.toastr.notice('Image OK')
             }
             this.cdr.detectChanges()
         }
@@ -632,11 +631,11 @@ export class QuickPortForwardModalComponent implements OnInit {
 
     saveNewPreset(): void {
         if (!this.addForm.name.trim()) {
-            this.toastr.warning(this.translate.instant('Please enter service name.'))
+            this.toastr.notice(this.translate.instant('Please enter service name.'))
             return
         }
         if (!this.addForm.localPort) {
-            this.toastr.warning(this.translate.instant('Please enter local port.'))
+            this.toastr.notice(this.translate.instant('Please enter local port.'))
             return
         }
 
@@ -655,7 +654,7 @@ export class QuickPortForwardModalComponent implements OnInit {
 
         const current = [...this.presets, newPreset]
         this.forwardService.savePresets(current)
-        this.toastr.success(`${this.translate.instant('Preset saved!')} (${newPreset.name})`)
+        this.toastr.notice(`${this.translate.instant('Preset saved!')} (${newPreset.name})`)
 
         // Reset Add Form
         this.addForm = {
@@ -675,11 +674,11 @@ export class QuickPortForwardModalComponent implements OnInit {
 
     async startNewTunnelNow(): Promise<void> {
         if (!this.session) {
-            this.toastr.warning(this.translate.instant('No active SSH session found.'))
+            this.toastr.notice(this.translate.instant('No active SSH session found.'))
             return
         }
         if (!this.addForm.localPort) {
-            this.toastr.warning(this.translate.instant('Please enter local port.'))
+            this.toastr.notice(this.translate.instant('Please enter local port.'))
             return
         }
 
@@ -692,7 +691,7 @@ export class QuickPortForwardModalComponent implements OnInit {
                 targetPort: Number(this.addForm.targetPort || this.addForm.localPort),
                 description: this.addForm.description || this.addForm.name || '',
             })
-            this.toastr.success(`${this.translate.instant('Tunnel started on port')} ${this.addForm.localPort}`)
+            this.toastr.notice(`${this.translate.instant('Tunnel started on port')} ${this.addForm.localPort}`)
             this.saveNewPreset()
         } catch (err: any) {
             this.toastr.error(`${err.message || err}`)
@@ -702,11 +701,11 @@ export class QuickPortForwardModalComponent implements OnInit {
     saveEditedPreset(): void {
         if (!this.editPresetItem) return
         if (!this.editForm.name.trim()) {
-            this.toastr.warning(this.translate.instant('Please enter service name.'))
+            this.toastr.notice(this.translate.instant('Please enter service name.'))
             return
         }
         if (!this.editForm.localPort) {
-            this.toastr.warning(this.translate.instant('Please enter local port.'))
+            this.toastr.notice(this.translate.instant('Please enter local port.'))
             return
         }
 
@@ -725,17 +724,17 @@ export class QuickPortForwardModalComponent implements OnInit {
 
         const current = this.presets.map(p => p.id === updatedPreset.id ? updatedPreset : p)
         this.forwardService.savePresets(current)
-        this.toastr.success(`${this.translate.instant('Preset saved!')} (${updatedPreset.name})`)
+        this.toastr.notice(`${this.translate.instant('Preset saved!')} (${updatedPreset.name})`)
         this.cancelEdit()
     }
 
     async startEditedTunnelNow(): Promise<void> {
         if (!this.session) {
-            this.toastr.warning(this.translate.instant('No active SSH session found.'))
+            this.toastr.notice(this.translate.instant('No active SSH session found.'))
             return
         }
         if (!this.editForm.localPort) {
-            this.toastr.warning(this.translate.instant('Please enter local port.'))
+            this.toastr.notice(this.translate.instant('Please enter local port.'))
             return
         }
 
@@ -748,7 +747,7 @@ export class QuickPortForwardModalComponent implements OnInit {
                 targetPort: Number(this.editForm.targetPort || this.editForm.localPort),
                 description: this.editForm.description || this.editForm.name || '',
             })
-            this.toastr.success(`${this.translate.instant('Tunnel started on port')} ${this.editForm.localPort}`)
+            this.toastr.notice(`${this.translate.instant('Tunnel started on port')} ${this.editForm.localPort}`)
             this.saveEditedPreset()
         } catch (err: any) {
             this.toastr.error(`${err.message || err}`)

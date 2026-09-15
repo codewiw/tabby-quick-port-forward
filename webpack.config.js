@@ -49,7 +49,6 @@ module.exports = {
     /^@angular/,
     /^rxjs/,
     /^tabby-/,
-    'ngx-toastr',
     '@luminati-io/socksv5',
     'electron',
     'fs',
