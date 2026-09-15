@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule, NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
-import TabbyCoreModule, { ConfigProvider, TranslateService, AppService } from 'tabby-core'
+import TabbyCoreModule, { ConfigProvider, TranslateService, AppService, ConfigService } from 'tabby-core'
 import { SettingsTabProvider } from 'tabby-settings'
 
 import { QuickPortForwardConfigProvider } from './config'
@@ -42,11 +42,24 @@ export default class QuickPortForwardModule {
         ngbModal: NgbModal,
         translate: TranslateService,
         forwardService: QuickPortForwardService,
+        config: ConfigService,
     ) {
-        // Register translations
-        for (const [lang, trans] of Object.entries(TRANSLATIONS)) {
-            translate.setTranslation(lang, trans, true)
-        }
+        // Safe translation loading: wait for config.ready$ and do NOT overwrite Tabby's configured language
+        config.ready$.subscribe(() => {
+            setTimeout(() => {
+                try {
+                    for (const [lang, trans] of Object.entries(TRANSLATIONS)) {
+                        translate.setTranslation(lang, trans, true)
+                    }
+                    // Re-apply user's configured language (e.g. pt-BR) so Tabby NEVER resets to English!
+                    if (config.store?.language) {
+                        translate.use(config.store.language)
+                    }
+                } catch (e) {
+                    console.error('[QuickPortForward] Translation init error:', e)
+                }
+            }, 1000)
+        })
 
         const openEnhancedModal = (session: any) => {
             if (!session) return
@@ -54,9 +67,7 @@ export default class QuickPortForwardModule {
             modal.componentInstance.session = session
         }
 
-        // 1. DOM Capture-phase interception on the server's taskbar "Ports" button!
-        // This guarantees that whenever the user clicks the "Ports" button in the SSH tab's toolbar,
-        // it intercepts the click BEFORE the native modal can open, and opens our enhanced modal!
+        // DOM Capture-phase interception on the server's taskbar "Ports" button
         if (typeof document !== 'undefined') {
             document.addEventListener('click', (event: MouseEvent) => {
                 const target = (event.target as HTMLElement)?.closest('button')
@@ -80,10 +91,10 @@ export default class QuickPortForwardModule {
                         openEnhancedModal(session)
                     }
                 }
-            }, true) // TRUE = CAPTURE PHASE!
+            }, true)
         }
 
-        // 2. Also patch SSHTabComponent.prototype if available
+        // Hook for SSHTabComponent instance & prototype
         const hookTab = (tab: any) => {
             if (!tab) return
             if (tab.showPortForwarding && !tab.__qpf_patched) {
@@ -100,7 +111,6 @@ export default class QuickPortForwardModule {
             }
         }
 
-        // Hook existing and new tabs
         const walk = (t: any) => {
             if (!t) return
             if (typeof t.getAllTabs === 'function') {

@@ -19,7 +19,7 @@ import { PortForwardPreset } from '../types'
         </div>
 
         <div class="modal-body p-3">
-            <!-- Tabs -->
+            <!-- Tabs Bar -->
             <ul class="nav nav-tabs border-secondary mb-3">
                 <li class="nav-item">
                     <a class="nav-link cursor-pointer" [class.active]="activeTab === 'tunnels'" (click)="activeTab = 'tunnels'">
@@ -28,15 +28,22 @@ import { PortForwardPreset } from '../types'
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link cursor-pointer" [class.active]="activeTab === 'add'" (click)="activeTab = 'add'">
-                        <i class="fas fa-plus me-1"></i>
-                        {{ isEditing ? 'Editar Túnel' : 'Adicionar Túnel' }}
+                    <a class="nav-link cursor-pointer" [class.active]="activeTab === 'add'" (click)="switchToAddTab()">
+                        <i class="fas fa-plus me-1"></i> Adicionar Túnel
+                    </a>
+                </li>
+                <!-- Dynamic Edit Tab: visible when editing a tunnel -->
+                <li class="nav-item" *ngIf="isEditing">
+                    <a class="nav-link cursor-pointer active text-warning d-flex align-items-center" (click)="activeTab = 'edit'">
+                        <i class="fas fa-edit me-1"></i>
+                        <span>Editar: {{ editPresetItem?.name || 'Túnel' }}</span>
+                        <i class="fas fa-times ms-2 text-muted close-edit-tab" (click)="cancelEdit($event)" title="Fechar edição"></i>
                     </a>
                 </li>
             </ul>
 
             <!-- ============================================== -->
-            <!-- TAB 1: MEUS TÚNEIS & TÚNEIS ATIVOS             -->
+            <!-- TAB 1: MEUS TÚNEIS                             -->
             <!-- ============================================== -->
             <div *ngIf="activeTab === 'tunnels'">
                 <!-- Active Tunnels Section (if any active) -->
@@ -63,8 +70,8 @@ import { PortForwardPreset } from '../types'
                                     </div>
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger" (click)="stopForward(fw)">
-                                <i class="fas fa-stop me-1"></i> Parar
+                            <button class="btn btn-sm btn-outline-danger btn-toggle-tunnel" (click)="stopForward(fw)">
+                                <i class="fas fa-stop me-1"></i><span>Parar</span>
                             </button>
                         </div>
                     </div>
@@ -88,7 +95,7 @@ import { PortForwardPreset } from '../types'
                 <div *ngIf="presets.length === 0" class="text-center py-5 text-muted border border-secondary border-dashed rounded">
                     <i class="fas fa-network-wired fa-2x mb-3 opacity-50"></i>
                     <p class="mb-3 small">Nenhum túnel configurado ainda.</p>
-                    <button class="btn btn-sm btn-primary" (click)="activeTab = 'add'">
+                    <button class="btn btn-sm btn-primary" (click)="switchToAddTab()">
                         <i class="fas fa-plus me-1"></i> Adicionar Túnel
                     </button>
                 </div>
@@ -116,9 +123,9 @@ import { PortForwardPreset } from '../types'
                             </div>
                         </div>
 
-                        <!-- Actions -->
+                        <!-- Actions: Identical widths for Iniciar and Parar (88px) -->
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                            <button class="btn btn-sm"
+                            <button class="btn btn-sm btn-toggle-tunnel"
                                     [class.btn-success]="!isForwarded(preset)"
                                     [class.btn-danger]="isForwarded(preset)"
                                     [disabled]="busyPresets.has(preset.id)"
@@ -128,11 +135,11 @@ import { PortForwardPreset } from '../types'
                                 <span>{{ isForwarded(preset) ? 'Parar' : 'Iniciar' }}</span>
                             </button>
 
-                            <button class="btn btn-sm btn-link text-muted" (click)="editPreset(preset)" title="Editar">
+                            <button class="btn btn-sm btn-link text-muted" (click)="startEditPreset(preset)" title="Editar túnel">
                                 <i class="fas fa-edit"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-link text-danger" (click)="deletePreset(preset)" title="Excluir">
+                            <button class="btn btn-sm btn-link text-danger" (click)="deletePreset(preset)" title="Excluir túnel">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
@@ -159,25 +166,25 @@ import { PortForwardPreset } from '../types'
                     </select>
                 </div>
 
-                <!-- Custom Form -->
+                <!-- Form -->
                 <div class="card bg-transparent border-secondary p-3">
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Nome do Serviço</label>
                             <input type="text" class="form-control form-control-sm" 
-                                   [(ngModel)]="formPreset.name" placeholder="ex: PostgreSQL, Redis, Khomp...">
+                                   [(ngModel)]="addForm.name" placeholder="ex: PostgreSQL, Redis, Khomp...">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Tipo de Encaminhamento</label>
                             <div class="btn-group btn-group-sm w-100">
-                                <input type="radio" class="btn-check" id="fLocal" name="fType" [value]="PortForwardType.Local" [(ngModel)]="formPreset.type">
-                                <label class="btn btn-outline-secondary" for="fLocal">Local</label>
+                                <input type="radio" class="btn-check" id="addFLocal" name="addFType" [value]="PortForwardType.Local" [(ngModel)]="addForm.type">
+                                <label class="btn btn-outline-secondary" for="addFLocal">Local</label>
 
-                                <input type="radio" class="btn-check" id="fRemote" name="fType" [value]="PortForwardType.Remote" [(ngModel)]="formPreset.type">
-                                <label class="btn btn-outline-secondary" for="fRemote">Remoto</label>
+                                <input type="radio" class="btn-check" id="addFRemote" name="addFType" [value]="PortForwardType.Remote" [(ngModel)]="addForm.type">
+                                <label class="btn btn-outline-secondary" for="addFRemote">Remoto</label>
 
-                                <input type="radio" class="btn-check" id="fDynamic" name="fType" [value]="PortForwardType.Dynamic" [(ngModel)]="formPreset.type">
-                                <label class="btn btn-outline-secondary" for="fDynamic">SOCKS5</label>
+                                <input type="radio" class="btn-check" id="addFDynamic" name="addFType" [value]="PortForwardType.Dynamic" [(ngModel)]="addForm.type">
+                                <label class="btn btn-outline-secondary" for="addFDynamic">SOCKS5</label>
                             </div>
                         </div>
                     </div>
@@ -186,21 +193,21 @@ import { PortForwardPreset } from '../types'
                         <div class="col-md-3">
                             <label class="form-label small fw-bold">Host Local</label>
                             <input type="text" class="form-control form-control-sm font-monospace" 
-                                   [(ngModel)]="formPreset.localHost" placeholder="127.0.0.1">
+                                   [(ngModel)]="addForm.localHost" placeholder="127.0.0.1">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-bold">Porta Local</label>
                             <input type="number" class="form-control form-control-sm font-monospace" 
-                                   [(ngModel)]="formPreset.localPort" placeholder="5432">
+                                   [(ngModel)]="addForm.localPort" placeholder="5432">
                         </div>
-                        <div class="col-md-6" *ngIf="formPreset.type !== PortForwardType.Dynamic">
+                        <div class="col-md-6" *ngIf="addForm.type !== PortForwardType.Dynamic">
                             <label class="form-label small fw-bold">Host e Porta de Destino</label>
                             <div class="input-group input-group-sm">
                                 <input type="text" class="form-control font-monospace" 
-                                       [(ngModel)]="formPreset.targetAddress" placeholder="127.0.0.1">
+                                       [(ngModel)]="addForm.targetAddress" placeholder="127.0.0.1">
                                 <span class="input-group-text">:</span>
                                 <input type="number" class="form-control font-monospace" 
-                                       [(ngModel)]="formPreset.targetPort" placeholder="5432">
+                                       [(ngModel)]="addForm.targetPort" placeholder="5432">
                             </div>
                         </div>
                     </div>
@@ -208,7 +215,7 @@ import { PortForwardPreset } from '../types'
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Descrição (Opcional)</label>
                         <input type="text" class="form-control form-control-sm" 
-                               [(ngModel)]="formPreset.description" placeholder="Descrição opcional">
+                               [(ngModel)]="addForm.description" placeholder="Descrição opcional">
                     </div>
 
                     <!-- Clean SVG Upload & FontAwesome Input -->
@@ -217,30 +224,118 @@ import { PortForwardPreset } from '../types'
                         <div class="d-flex align-items-center gap-3">
                             <div class="icon-preview rounded border border-secondary p-1 d-flex align-items-center justify-content-center" 
                                  style="width: 38px; height: 38px;">
-                                <quick-forward-icon [icon]="formPreset.icon || ''" [size]="24"></quick-forward-icon>
+                                <quick-forward-icon [icon]="addForm.icon || ''" [size]="24"></quick-forward-icon>
                             </div>
 
                             <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer">
                                 <i class="fas fa-upload me-1"></i> Escolher arquivo SVG
-                                <input type="file" accept=".svg,.png,.webp" class="d-none" (change)="onSvgUpload($event)">
+                                <input type="file" accept=".svg,.png,.webp" class="d-none" (change)="onSvgUpload($event, addForm)">
                             </label>
 
                             <input type="text" class="form-control form-control-sm font-monospace flex-grow-1" 
-                                   [(ngModel)]="fontAwesomeInput" 
-                                   (ngModelChange)="onFontAwesomeChange($event)" 
-                                   placeholder="Ou digite classe FontAwesome (ex: fas fa-database, fa-server)...">
+                                   [(ngModel)]="addFontAwesome" 
+                                   (ngModelChange)="onFontAwesomeChange($event, addForm)" 
+                                   placeholder="Ou digite FontAwesome (ex: fas fa-database, fa-server)...">
                         </div>
                     </div>
 
                     <!-- Buttons -->
                     <div class="d-flex justify-content-end gap-2 pt-2 border-top border-secondary">
-                        <button class="btn btn-sm btn-secondary" *ngIf="isEditing" (click)="cancelEdit()">
-                            Cancelar
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="saveAsPreset()">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="saveNewPreset()">
                             <i class="fas fa-save me-1"></i> Salvar Predefinição
                         </button>
-                        <button class="btn btn-sm btn-primary" (click)="startTunnelNow()">
+                        <button class="btn btn-sm btn-primary" (click)="startNewTunnelNow()">
+                            <i class="fas fa-play me-1"></i> Iniciar Túnel Agora
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- TAB 3: EDITAR TÚNEL                            -->
+            <!-- ============================================== -->
+            <div *ngIf="activeTab === 'edit' && editPresetItem">
+                <div class="card bg-transparent border-secondary p-3">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nome do Serviço</label>
+                            <input type="text" class="form-control form-control-sm" 
+                                   [(ngModel)]="editForm.name" placeholder="ex: PostgreSQL, Redis...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Tipo de Encaminhamento</label>
+                            <div class="btn-group btn-group-sm w-100">
+                                <input type="radio" class="btn-check" id="editFLocal" name="editFType" [value]="PortForwardType.Local" [(ngModel)]="editForm.type">
+                                <label class="btn btn-outline-secondary" for="editFLocal">Local</label>
+
+                                <input type="radio" class="btn-check" id="editFRemote" name="editFType" [value]="PortForwardType.Remote" [(ngModel)]="editForm.type">
+                                <label class="btn btn-outline-secondary" for="editFRemote">Remoto</label>
+
+                                <input type="radio" class="btn-check" id="editFDynamic" name="editFType" [value]="PortForwardType.Dynamic" [(ngModel)]="editForm.type">
+                                <label class="btn btn-outline-secondary" for="editFDynamic">SOCKS5</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Host Local</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" 
+                                   [(ngModel)]="editForm.localHost" placeholder="127.0.0.1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Porta Local</label>
+                            <input type="number" class="form-control form-control-sm font-monospace" 
+                                   [(ngModel)]="editForm.localPort" placeholder="5432">
+                        </div>
+                        <div class="col-md-6" *ngIf="editForm.type !== PortForwardType.Dynamic">
+                            <label class="form-label small fw-bold">Host e Porta de Destino</label>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control font-monospace" 
+                                       [(ngModel)]="editForm.targetAddress" placeholder="127.0.0.1">
+                                <span class="input-group-text">:</span>
+                                <input type="number" class="form-control font-monospace" 
+                                       [(ngModel)]="editForm.targetPort" placeholder="5432">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Descrição (Opcional)</label>
+                        <input type="text" class="form-control form-control-sm" 
+                               [(ngModel)]="editForm.description" placeholder="Descrição opcional">
+                    </div>
+
+                    <!-- Clean SVG Upload & FontAwesome Input -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Ícone do Serviço</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-preview rounded border border-secondary p-1 d-flex align-items-center justify-content-center" 
+                                 style="width: 38px; height: 38px;">
+                                <quick-forward-icon [icon]="editForm.icon || ''" [size]="24"></quick-forward-icon>
+                            </div>
+
+                            <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer">
+                                <i class="fas fa-upload me-1"></i> Escolher arquivo SVG
+                                <input type="file" accept=".svg,.png,.webp" class="d-none" (change)="onSvgUpload($event, editForm)">
+                            </label>
+
+                            <input type="text" class="form-control form-control-sm font-monospace flex-grow-1" 
+                                   [(ngModel)]="editFontAwesome" 
+                                   (ngModelChange)="onFontAwesomeChange($event, editForm)" 
+                                   placeholder="Ou digite FontAwesome (ex: fas fa-database, fa-server)...">
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top border-secondary">
+                        <button class="btn btn-sm btn-secondary" (click)="cancelEdit()">
+                            Cancelar
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="saveEditedPreset()">
+                            <i class="fas fa-save me-1"></i> Salvar Alterações
+                        </button>
+                        <button class="btn btn-sm btn-primary" (click)="startEditedTunnelNow()">
                             <i class="fas fa-play me-1"></i> Iniciar Túnel Agora
                         </button>
                     </div>
@@ -248,6 +343,7 @@ import { PortForwardPreset } from '../types'
             </div>
         </div>
 
+        <!-- Footer: Only Fechar button -->
         <div class="modal-footer border-secondary py-2 px-3 d-flex justify-content-end">
             <button type="button" class="btn btn-secondary btn-sm" (click)="activeModal.close()">
                 Fechar
@@ -256,6 +352,15 @@ import { PortForwardPreset } from '../types'
     `,
     styles: [`
         .cursor-pointer { cursor: pointer; }
+        .close-edit-tab {
+            font-size: 11px;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .close-edit-tab:hover {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.2);
+        }
         .tunnel-icon {
             width: 32px;
             height: 32px;
@@ -266,21 +371,36 @@ import { PortForwardPreset } from '../types'
         .icon-preview {
             background: rgba(0, 0, 0, 0.2);
         }
+        .btn-toggle-tunnel {
+            width: 88px !important;
+            min-width: 88px !important;
+            max-width: 88px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
     `]
 })
 export class QuickPortForwardModalComponent implements OnInit {
     @Input() session: any = null
-    activeTab: 'tunnels' | 'add' = 'tunnels'
+    activeTab: 'tunnels' | 'add' | 'edit' = 'tunnels'
     searchQuery = ''
     busyPresets = new Set<string>()
     catalogPresets: PortForwardPreset[] = []
     PortForwardType = PortForwardType
 
+    // Edit State
     isEditing = false
-    editingId: string | null = null
-    fontAwesomeInput = ''
+    editPresetItem: PortForwardPreset | null = null
+    editForm: any = {}
+    editFontAwesome = ''
 
-    formPreset: any = {
+    // Add State
+    addFontAwesome = ''
+    addForm: any = {
         name: '',
         type: PortForwardType.Local,
         localHost: '127.0.0.1',
@@ -353,6 +473,41 @@ export class QuickPortForwardModalComponent implements OnInit {
         }
     }
 
+    switchToAddTab(): void {
+        this.activeTab = 'add'
+    }
+
+    startEditPreset(preset: PortForwardPreset): void {
+        this.editPresetItem = preset
+        this.isEditing = true
+        this.editForm = {
+            name: preset.name,
+            type: preset.type === 'remote' ? PortForwardType.Remote : (preset.type === 'dynamic' ? PortForwardType.Dynamic : PortForwardType.Local),
+            localHost: preset.localHost || '127.0.0.1',
+            localPort: preset.localPort,
+            targetAddress: preset.targetAddress || '127.0.0.1',
+            targetPort: preset.targetPort,
+            description: preset.description || '',
+            icon: preset.icon || 'fas fa-plug',
+        }
+        if (preset.icon && !preset.icon.trim().startsWith('<svg')) {
+            this.editFontAwesome = preset.icon
+        } else {
+            this.editFontAwesome = ''
+        }
+        this.activeTab = 'edit'
+    }
+
+    cancelEdit(event?: MouseEvent): void {
+        if (event) {
+            event.preventDefault()
+            event.stopPropagation()
+        }
+        this.isEditing = false
+        this.editPresetItem = null
+        this.activeTab = 'tunnels'
+    }
+
     async togglePreset(preset: PortForwardPreset): Promise<void> {
         if (!this.session) {
             this.toastr.warning('Nenhuma sessão SSH ativa encontrada.')
@@ -391,7 +546,7 @@ export class QuickPortForwardModalComponent implements OnInit {
         if (!id) return
         const item = this.catalogPresets.find(p => p.id === id)
         if (item) {
-            this.formPreset = {
+            this.addForm = {
                 name: item.name,
                 type: item.type === 'remote' ? PortForwardType.Remote : (item.type === 'dynamic' ? PortForwardType.Dynamic : PortForwardType.Local),
                 localHost: item.localHost || '127.0.0.1',
@@ -401,63 +556,22 @@ export class QuickPortForwardModalComponent implements OnInit {
                 description: item.description || '',
                 icon: item.icon || 'fas fa-plug',
             }
-            this.fontAwesomeInput = ''
+            this.addFontAwesome = ''
             this.toastr.info(`Serviço ${item.name} selecionado.`)
         }
         event.target.value = ''
     }
 
-    editPreset(preset: PortForwardPreset): void {
-        this.isEditing = true
-        this.editingId = preset.id
-        this.formPreset = {
-            name: preset.name,
-            type: preset.type === 'remote' ? PortForwardType.Remote : (preset.type === 'dynamic' ? PortForwardType.Dynamic : PortForwardType.Local),
-            localHost: preset.localHost || '127.0.0.1',
-            localPort: preset.localPort,
-            targetAddress: preset.targetAddress || '127.0.0.1',
-            targetPort: preset.targetPort,
-            description: preset.description || '',
-            icon: preset.icon || 'fas fa-plug',
-        }
-        if (preset.icon && !preset.icon.trim().startsWith('<svg')) {
-            this.fontAwesomeInput = preset.icon
-        } else {
-            this.fontAwesomeInput = ''
-        }
-        this.activeTab = 'add'
-    }
-
     deletePreset(preset: PortForwardPreset): void {
         const list = this.presets.filter(p => p.id !== preset.id)
         this.forwardService.savePresets(list)
+        if (this.editPresetItem?.id === preset.id) {
+            this.cancelEdit()
+        }
         this.toastr.info(`${preset.name} removido`)
     }
 
-    cancelEdit(): void {
-        this.isEditing = false
-        this.editingId = null
-        this.resetForm()
-        this.activeTab = 'tunnels'
-    }
-
-    resetForm(): void {
-        this.formPreset = {
-            name: '',
-            type: PortForwardType.Local,
-            localHost: '127.0.0.1',
-            localPort: 5432,
-            targetAddress: '127.0.0.1',
-            targetPort: 5432,
-            description: '',
-            icon: 'fas fa-plug',
-        }
-        this.fontAwesomeInput = ''
-        this.isEditing = false
-        this.editingId = null
-    }
-
-    onSvgUpload(event: any): void {
+    onSvgUpload(event: any, targetForm: any): void {
         const file = event.target.files && event.target.files[0]
         if (!file) return
         const reader = new FileReader()
@@ -465,12 +579,14 @@ export class QuickPortForwardModalComponent implements OnInit {
             const content = e.target.result
             if (typeof content === 'string' && content.includes('<svg')) {
                 const cleanSvg = content.substring(content.indexOf('<svg'))
-                this.formPreset.icon = cleanSvg
-                this.fontAwesomeInput = ''
+                targetForm.icon = cleanSvg
+                if (targetForm === this.addForm) this.addFontAwesome = ''
+                if (targetForm === this.editForm) this.editFontAwesome = ''
                 this.toastr.success('Ícone SVG carregado com sucesso!')
             } else {
-                this.formPreset.icon = content
-                this.fontAwesomeInput = ''
+                targetForm.icon = content
+                if (targetForm === this.addForm) this.addFontAwesome = ''
+                if (targetForm === this.editForm) this.editFontAwesome = ''
                 this.toastr.success('Imagem carregada!')
             }
             this.cdr.detectChanges()
@@ -483,71 +599,131 @@ export class QuickPortForwardModalComponent implements OnInit {
         event.target.value = ''
     }
 
-    onFontAwesomeChange(val: string): void {
+    onFontAwesomeChange(val: string, targetForm: any): void {
         if (val && val.trim()) {
-            this.formPreset.icon = val.trim()
+            targetForm.icon = val.trim()
         }
     }
 
-    saveAsPreset(): void {
-        if (!this.formPreset.name.trim()) {
+    saveNewPreset(): void {
+        if (!this.addForm.name.trim()) {
             this.toastr.warning('Por favor, informe o nome do serviço.')
             return
         }
-        if (!this.formPreset.localPort) {
+        if (!this.addForm.localPort) {
             this.toastr.warning('Por favor, informe a porta local.')
             return
         }
 
-        const current = [...this.presets]
-        const typeStr: 'local' | 'remote' | 'dynamic' = this.formPreset.type === PortForwardType.Remote ? 'remote' : (this.formPreset.type === PortForwardType.Dynamic ? 'dynamic' : 'local')
-
-        const presetToSave: PortForwardPreset = {
-            id: this.isEditing && this.editingId ? this.editingId : Date.now().toString(),
-            name: this.formPreset.name.trim(),
+        const typeStr: 'local' | 'remote' | 'dynamic' = this.addForm.type === PortForwardType.Remote ? 'remote' : (this.addForm.type === PortForwardType.Dynamic ? 'dynamic' : 'local')
+        const newPreset: PortForwardPreset = {
+            id: Date.now().toString(),
+            name: this.addForm.name.trim(),
             type: typeStr,
-            localHost: this.formPreset.localHost || '127.0.0.1',
-            localPort: Number(this.formPreset.localPort),
-            targetAddress: this.formPreset.targetAddress || '127.0.0.1',
-            targetPort: Number(this.formPreset.targetPort || this.formPreset.localPort),
-            description: this.formPreset.description || '',
-            icon: this.formPreset.icon || 'fas fa-plug',
+            localHost: this.addForm.localHost || '127.0.0.1',
+            localPort: Number(this.addForm.localPort),
+            targetAddress: this.addForm.targetAddress || '127.0.0.1',
+            targetPort: Number(this.addForm.targetPort || this.addForm.localPort),
+            description: this.addForm.description || '',
+            icon: this.addForm.icon || 'fas fa-plug',
         }
 
-        if (this.isEditing && this.editingId) {
-            const idx = current.findIndex(p => p.id === this.editingId)
-            if (idx !== -1) current[idx] = presetToSave
-        } else {
-            current.push(presetToSave)
-        }
-
+        const current = [...this.presets, newPreset]
         this.forwardService.savePresets(current)
-        this.toastr.success(`Predefinição "${presetToSave.name}" salva!`)
-        this.resetForm()
+        this.toastr.success(`Predefinição "${newPreset.name}" adicionada!`)
+
+        // Reset Add Form
+        this.addForm = {
+            name: '',
+            type: PortForwardType.Local,
+            localHost: '127.0.0.1',
+            localPort: 5432,
+            targetAddress: '127.0.0.1',
+            targetPort: 5432,
+            description: '',
+            icon: 'fas fa-plug',
+        }
+        this.addFontAwesome = ''
         this.activeTab = 'tunnels'
     }
 
-    async startTunnelNow(): Promise<void> {
+    async startNewTunnelNow(): Promise<void> {
         if (!this.session) {
             this.toastr.warning('Nenhuma sessão SSH ativa encontrada.')
             return
         }
-        if (!this.formPreset.localPort) {
+        if (!this.addForm.localPort) {
             this.toastr.warning('Por favor, informe a porta local.')
             return
         }
 
         try {
             await this.forwardService.addCustomForward(this.session, {
-                type: this.formPreset.type,
-                host: this.formPreset.localHost || '127.0.0.1',
-                port: Number(this.formPreset.localPort),
-                targetAddress: this.formPreset.targetAddress || '127.0.0.1',
-                targetPort: Number(this.formPreset.targetPort || this.formPreset.localPort),
-                description: this.formPreset.description || this.formPreset.name || '',
+                type: this.addForm.type,
+                host: this.addForm.localHost || '127.0.0.1',
+                port: Number(this.addForm.localPort),
+                targetAddress: this.addForm.targetAddress || '127.0.0.1',
+                targetPort: Number(this.addForm.targetPort || this.addForm.localPort),
+                description: this.addForm.description || this.addForm.name || '',
             })
-            this.toastr.success(`Túnel iniciado na porta ${this.formPreset.localPort}!`)
-            this.saveAsPreset()
+            this.toastr.success(`Túnel iniciado na porta ${this.addForm.localPort}!`)
+            this.saveNewPreset()
+        } catch (err: any) {
+            this.toastr.error(`Falha ao iniciar túnel: ${err.message || err}`)
+        }
+    }
+
+    saveEditedPreset(): void {
+        if (!this.editPresetItem) return
+        if (!this.editForm.name.trim()) {
+            this.toastr.warning('Por favor, informe o nome do serviço.')
+            return
+        }
+        if (!this.editForm.localPort) {
+            this.toastr.warning('Por favor, informe a porta local.')
+            return
+        }
+
+        const typeStr: 'local' | 'remote' | 'dynamic' = this.editForm.type === PortForwardType.Remote ? 'remote' : (this.editForm.type === PortForwardType.Dynamic ? 'dynamic' : 'local')
+        const updatedPreset: PortForwardPreset = {
+            id: this.editPresetItem.id,
+            name: this.editForm.name.trim(),
+            type: typeStr,
+            localHost: this.editForm.localHost || '127.0.0.1',
+            localPort: Number(this.editForm.localPort),
+            targetAddress: this.editForm.targetAddress || '127.0.0.1',
+            targetPort: Number(this.editForm.targetPort || this.editForm.localPort),
+            description: this.editForm.description || '',
+            icon: this.editForm.icon || 'fas fa-plug',
+        }
+
+        const current = this.presets.map(p => p.id === updatedPreset.id ? updatedPreset : p)
+        this.forwardService.savePresets(current)
+        this.toastr.success(`Alterações em "${updatedPreset.name}" salvas!`)
+        this.cancelEdit()
+    }
+
+    async startEditedTunnelNow(): Promise<void> {
+        if (!this.session) {
+            this.toastr.warning('Nenhuma sessão SSH ativa encontrada.')
+            return
+        }
+        if (!this.editForm.localPort) {
+            this.toastr.warning('Por favor, informe a porta local.')
+            return
+        }
+
+        try {
+            await this.forwardService.addCustomForward(this.session, {
+                type: this.editForm.type,
+                host: this.editForm.localHost || '127.0.0.1',
+                port: Number(this.editForm.localPort),
+                targetAddress: this.editForm.targetAddress || '127.0.0.1',
+                targetPort: Number(this.editForm.targetPort || this.editForm.localPort),
+                description: this.editForm.description || this.editForm.name || '',
+            })
+            this.toastr.success(`Túnel iniciado na porta ${this.editForm.localPort}!`)
+            this.saveEditedPreset()
         } catch (err: any) {
             this.toastr.error(`Falha ao iniciar túnel: ${err.message || err}`)
         }
