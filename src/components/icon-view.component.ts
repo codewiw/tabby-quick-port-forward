@@ -6,8 +6,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
     template: `
         <div class="quick-forward-icon-container" [style.width.px]="size" [style.height.px]="size">
             <div *ngIf="isSvg" class="svg-wrapper" [innerHTML]="safeSvg"></div>
-            <i *ngIf="!isSvg && icon" [class]="icon" [style.font-size.px]="size * 0.8"></i>
-            <i *ngIf="!icon" class="fas fa-plug text-primary" [style.font-size.px]="size * 0.8"></i>
+            <i *ngIf="!isSvg && icon" [class]="icon" [style.font-size.px]="size * 0.75"></i>
+            <i *ngIf="!icon" class="fas fa-plug text-muted" [style.font-size.px]="size * 0.75"></i>
         </div>
     `,
     styles: [`
@@ -17,6 +17,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
             justify-content: center;
             flex-shrink: 0;
             vertical-align: middle;
+            color: currentColor;
         }
         .svg-wrapper {
             width: 100%;
@@ -24,13 +25,13 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
             display: flex;
             align-items: center;
             justify-content: center;
+            color: inherit;
         }
         .svg-wrapper ::ng-deep svg {
             width: 100%;
             height: 100%;
             display: block;
-            max-width: 100%;
-            max-height: 100%;
+            fill: currentColor;
         }
     `]
 })
