@@ -159,7 +159,7 @@ import { PortForwardPreset } from '../types'
                 <div class="mb-3" *ngIf="catalogPresets.length > 0">
                     <label class="form-label small fw-bold">Preencher a partir do Catálogo Oficial:</label>
                     <select class="form-select form-select-sm" (change)="onCatalogDropdownChange($event)">
-                        <option value="">Escolher serviço predefinido (PostgreSQL, Redis, MongoDB, Khomp, Docker...)...</option>
+                        <option value="">Escolher serviço predefinido (PostgreSQL, MySQL, Redis, MongoDB, Docker, Nginx, Grafana...)...</option>
                         <option *ngFor="let item of catalogPresets" [value]="item.id">
                             {{ item.name }} (Porta padrão: {{ item.localPort }})
                         </option>
@@ -172,7 +172,7 @@ import { PortForwardPreset } from '../types'
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Nome do Serviço</label>
                             <input type="text" class="form-control form-control-sm" 
-                                   [(ngModel)]="addForm.name" placeholder="ex: PostgreSQL, Redis, Khomp...">
+                                   [(ngModel)]="addForm.name" placeholder="ex: PostgreSQL, MySQL, Redis, Nginx...">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Tipo de Encaminhamento</label>

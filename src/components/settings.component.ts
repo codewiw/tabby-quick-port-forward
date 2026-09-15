@@ -45,7 +45,7 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
                 <div class="mb-3" *ngIf="isNewPreset && catalogPresets.length > 0">
                     <label class="form-label small fw-bold text-light">Preencher a partir do Catálogo Oficial:</label>
                     <select class="form-select form-select-sm" (change)="onCatalogSelect($event)">
-                        <option value="">Escolher serviço predefinido (PostgreSQL, Redis, MongoDB, Khomp, Docker...)...</option>
+                        <option value="">Escolher serviço predefinido (PostgreSQL, MySQL, Redis, MongoDB, Docker, Nginx, Grafana...)...</option>
                         <option *ngFor="let item of catalogPresets" [value]="item.id">
                             {{ item.name }} (Porta padrão: {{ item.localPort }})
                         </option>

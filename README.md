@@ -9,7 +9,7 @@ Manage reusable forwarding presets for databases, message queues, web consoles, 
 ## Features
 
 - ⚡ **1-Click Port Tunnels**: Start and stop port forwards instantly on your active SSH session.
-- 🐘 **Rich Service Icons**: Support for SVGs and FontAwesome icons (PostgreSQL, MongoDB, Redis, RabbitMQ, MySQL, Khomp, Docker, MinIO, Elasticsearch, etc.).
+- 🐘 **Rich Service Icons**: Authentic brand vector icons for 30+ popular services (PostgreSQL, MySQL, Redis, MongoDB, Docker, Nginx, Prometheus, Grafana, Kafka, RabbitMQ, Kubernetes, MinIO, Elasticsearch, etc.).
 - 📥 **Preset Catalog Download**: Starts clean, with instant 1-click download of the complete official service catalog from GitHub.
 - ✏️ **Full Customization**: Complete freedom to edit local ports, remote hosts, remote ports, and add custom presets.
 - 🔌 **Seamless Tabby Integration**: Automatically enhances the native **"Ports"** button on every SSH tab while preserving 100% compatibility with standard Local, Remote, and Dynamic (SOCKS5) forwarding.
