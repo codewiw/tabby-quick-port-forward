@@ -1,4 +1,4 @@
-import { NgModule, Injectable } from '@angular/core'
+import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule, NgbModal } from '@ng-bootstrap/ng-bootstrap'
@@ -45,40 +45,60 @@ export default class QuickPortForwardModule {
         translate: TranslateService,
         forwardService: QuickPortForwardService,
     ) {
-        // Register translations
+        // Register Portuguese and English translations
         for (const [lang, trans] of Object.entries(TRANSLATIONS)) {
             translate.setTranslation(lang, trans, true)
         }
 
-        // Patch SSH Tab's native "showPortForwarding" method so clicking "Ports" opens our modal!
+        const openEnhancedModal = (session: any) => {
+            if (!session) return
+            const modal = ngbModal.open(QuickPortForwardModalComponent, { size: 'lg' })
+            modal.componentInstance.session = session
+        }
+
+        // Hook function to patch SSH tab instances and their prototypes
         const hookSshTab = (tab: any) => {
             if (!tab) return
+
+            // Patch instance
             if (tab.showPortForwarding && !tab.__qpf_patched) {
                 tab.__qpf_patched = true
-                const originalShowPortForwarding = tab.showPortForwarding.bind(tab)
+                const orig = tab.showPortForwarding.bind(tab)
                 tab.showPortForwarding = function() {
-                    try {
-                        const session = tab.sshSession || (tab.session && tab.session.forwardedPorts !== undefined ? tab.session : null)
-                        if (session) {
-                            const modal = ngbModal.open(QuickPortForwardModalComponent, { size: 'lg' })
-                            modal.componentInstance.session = session
-                            return
-                        }
-                    } catch (err) {
-                        console.error('[QuickPortForward] Failed to open enhanced modal:', err)
+                    const session = tab.sshSession || (tab.session && tab.session.forwardedPorts !== undefined ? tab.session : null)
+                    if (session) {
+                        openEnhancedModal(session)
+                        return
                     }
-                    return originalShowPortForwarding()
+                    return orig()
+                }
+            }
+
+            // Patch prototype once
+            const proto = Object.getPrototypeOf(tab)
+            if (proto && proto.showPortForwarding && !proto.__qpf_proto_patched) {
+                proto.__qpf_proto_patched = true
+                const origProto = proto.showPortForwarding
+                proto.showPortForwarding = function() {
+                    const session = this.sshSession || (this.session && this.session.forwardedPorts !== undefined ? this.session : null)
+                    if (session) {
+                        openEnhancedModal(session)
+                        return
+                    }
+                    return origProto.apply(this, arguments)
                 }
             }
         }
 
-        // Hook existing and new tabs
+        // Hook existing tabs
         if (Array.isArray(app.tabs)) {
             app.tabs.forEach(tab => hookSshTab(tab))
         }
+
+        // Hook new tabs as they open
         if (app.tabOpened$) {
             app.tabOpened$.subscribe(tab => {
-                setTimeout(() => hookSshTab(tab), 100)
+                setTimeout(() => hookSshTab(tab), 150)
             })
         }
     }

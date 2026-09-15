@@ -2,7 +2,7 @@ import { Component, Injectable } from '@angular/core'
 import { ConfigService } from 'tabby-core'
 import { SettingsTabProvider } from 'tabby-settings'
 import { ToastrService } from 'ngx-toastr'
-import { QuickPortForwardService } from '../services/forward.service'
+import { QuickPortForwardService, PortForwardType } from '../services/forward.service'
 import { PortForwardPreset } from '../types'
 
 @Injectable()
@@ -20,37 +20,35 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
     template: `
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
-                <h3 class="m-0" translate>Port Forwarding Presets</h3>
-                <div class="text-muted small" translate>Manage reusable SSH port forwarding presets with custom service icons.</div>
+                <h3 class="m-0 fw-bold" translate>Port Forwarding Presets</h3>
+                <div class="text-muted small">Gerencie as predefinições de túnel SSH e o catálogo de serviços.</div>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-primary" [disabled]="loadingPresets" (click)="downloadPresets()">
-                    <i class="fas fa-cloud-download-alt me-1" [class.fa-spin]="loadingPresets"></i>
-                    <span translate>Download from GitHub</span>
+                <button class="btn btn-outline-secondary btn-sm" (click)="exportJson()">
+                    <i class="fas fa-file-export me-1"></i> Exportar JSON
                 </button>
-                <button class="btn btn-outline-secondary" (click)="newPreset()">
-                    <i class="fas fa-plus me-1"></i>
-                    <span translate>Add Preset</span>
-                </button>
+                <label class="btn btn-outline-secondary btn-sm mb-0">
+                    <i class="fas fa-file-import me-1"></i> Importar JSON
+                    <input type="file" accept=".json" class="d-none" (change)="importJson($event)">
+                </label>
             </div>
         </div>
 
-        <!-- Presets GitHub URL configuration -->
-        <div class="card mb-4 bg-dark-subtle border-secondary">
+        <!-- GitHub URL config -->
+        <div class="card mb-4 bg-dark border-secondary">
             <div class="card-body">
                 <div class="row g-3 align-items-center">
                     <div class="col-md-3">
-                        <label class="form-label fw-bold mb-0" translate>GitHub Presets URL</label>
-                        <div class="small text-muted" translate>URL to raw presets.json catalog</div>
+                        <label class="form-label fw-bold mb-0 text-light">URL do Catálogo GitHub</label>
+                        <div class="small text-muted">Arquivo presets.json para download</div>
                     </div>
                     <div class="col-md-9">
                         <div class="input-group">
-                            <input type="text" class="form-control font-monospace" 
+                            <input type="text" class="form-control font-monospace bg-dark border-secondary text-light" 
                                    [(ngModel)]="config.store.plugin.quickPortForward.presetsUrl" 
                                    (change)="saveConfig()">
                             <button class="btn btn-outline-secondary" (click)="resetUrl()">
-                                <i class="fas fa-undo me-1"></i>
-                                <span translate>Default</span>
+                                <i class="fas fa-undo me-1"></i> Restaurar URL
                             </button>
                         </div>
                     </div>
@@ -58,160 +56,144 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
             </div>
         </div>
 
-        <!-- Preset Editor Form (when editing or creating) -->
-        <div class="card mb-4 border-primary" *ngIf="editingPreset">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <span class="fw-bold">{{ isNewPreset ? 'Create New Preset' : 'Edit Preset: ' + editingPreset.name }}</span>
-                <button type="button" class="btn-close btn-close-white" (click)="cancelEdit()"></button>
-            </div>
-            <div class="card-body">
-                <div class="row g-3 mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold" translate>Service Name</label>
-                        <input type="text" class="form-control" [(ngModel)]="editingPreset.name" placeholder="e.g. PostgreSQL">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold" translate>Category</label>
-                        <input type="text" class="form-control" [(ngModel)]="editingPreset.category" placeholder="Database, Telephony, etc.">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold" translate>Forward Type</label>
-                        <select class="form-select" [(ngModel)]="editingPreset.type">
-                            <option value="local">Local</option>
-                            <option value="remote">Remote</option>
-                            <option value="dynamic">Dynamic (SOCKS)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row g-3 mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold" translate>Local Bind Host</label>
-                        <input type="text" class="form-control font-monospace" [(ngModel)]="editingPreset.localHost" placeholder="127.0.0.1">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold" translate>Local Port</label>
-                        <input type="number" class="form-control font-monospace" [(ngModel)]="editingPreset.localPort" placeholder="5432">
-                    </div>
-                    <div class="col-md-4" *ngIf="editingPreset.type !== 'dynamic'">
-                        <label class="form-label small fw-bold" translate>Target Host & Port</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control font-monospace" [(ngModel)]="editingPreset.targetAddress" placeholder="127.0.0.1">
-                            <span class="input-group-text">:</span>
-                            <input type="number" class="form-control font-monospace" [(ngModel)]="editingPreset.targetPort" placeholder="5432">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold" translate>Description</label>
-                    <input type="text" class="form-control" [(ngModel)]="editingPreset.description" placeholder="Brief description of this service">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold" translate>Service Icon (SVG Code or FontAwesome class)</label>
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control font-monospace" [(ngModel)]="editingPreset.icon" placeholder='<svg...> or "fas fa-database"'>
-                        <span class="input-group-text">
-                            <quick-forward-icon [icon]="editingPreset.icon || ''" [size]="20"></quick-forward-icon>
-                        </span>
-                    </div>
-                    <small class="text-muted">Tip: Paste SVG code or use FontAwesome classes like <code>fas fa-database</code>, <code>fas fa-server</code>, <code>fas fa-phone</code>, <code>fas fa-cubes</code>.</small>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                    <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
-                    <button class="btn btn-primary" (click)="saveEdit()">Save Preset</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Presets List -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="fw-bold">
-                    <span translate>Configured Presets</span> ({{ presets.length }})
-                </span>
+        <!-- Presets List & Management -->
+        <div class="card bg-dark border-secondary">
+            <div class="card-header bg-secondary bg-opacity-10 border-secondary d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-light">Predefinições Salvas ({{ presets.length }})</span>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-secondary" (click)="exportJson()">
-                        <i class="fas fa-file-export me-1"></i>
-                        <span translate>Export JSON</span>
+                    <input type="text" class="form-control form-control-sm bg-dark border-secondary text-light" 
+                           [(ngModel)]="searchQuery" placeholder="Filtrar predefinições..." style="width: 200px;">
+                    <button class="btn btn-sm btn-primary" (click)="newPreset()">
+                        <i class="fas fa-plus me-1"></i> Nova Predefinição
                     </button>
-                    <label class="btn btn-sm btn-outline-secondary mb-0">
-                        <i class="fas fa-file-import me-1"></i>
-                        <span translate>Import JSON</span>
-                        <input type="file" accept=".json" class="d-none" (change)="importJson($event)">
-                    </label>
                 </div>
             </div>
 
             <!-- Empty State -->
             <div *ngIf="presets.length === 0" class="card-body text-center py-5 text-muted">
-                <i class="fas fa-cubes fa-3x mb-3 text-secondary opacity-50"></i>
-                <p class="mb-3" translate>No presets configured yet. Download the official catalog or create your own.</p>
-                <button class="btn btn-primary" [disabled]="loadingPresets" (click)="downloadPresets()">
-                    <i class="fas fa-cloud-download-alt me-1" [class.fa-spin]="loadingPresets"></i>
-                    <span translate>Download Presets from GitHub</span>
+                <i class="fas fa-network-wired fa-3x mb-3 text-secondary opacity-50"></i>
+                <p class="mb-3 fs-6">Nenhuma predefinição salva no momento.</p>
+                <button class="btn btn-primary" [disabled]="loadingCatalog" (click)="downloadAllFromGitHub()">
+                    <i class="fas fa-cloud-download-alt me-1" [class.fa-spin]="loadingCatalog"></i>
+                    Baixar Catálogo Completo do GitHub
                 </button>
             </div>
 
             <!-- List -->
             <ul class="list-group list-group-flush" *ngIf="presets.length > 0">
-                <li *ngFor="let p of presets; let i = index" class="list-group-item d-flex align-items-center justify-content-between p-3">
+                <li *ngFor="let p of filteredPresets; let i = index" class="list-group-item bg-transparent border-secondary d-flex align-items-center justify-content-between p-3">
                     <div class="d-flex align-items-center flex-grow-1 me-3">
-                        <div class="preset-icon-box me-3">
+                        <div class="preset-icon-box me-3 p-1 rounded border border-secondary bg-black" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                             <quick-forward-icon [icon]="p.icon || ''" [size]="28"></quick-forward-icon>
                         </div>
                         <div>
-                            <div class="d-flex align-items-center">
-                                <strong class="me-2">{{ p.name }}</strong>
-                                <span class="badge bg-secondary me-2" *ngIf="p.category">{{ p.category }}</span>
-                                <span class="badge bg-dark-subtle border text-uppercase" style="font-size: 10px">{{ p.type }}</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <strong class="text-light fs-6">{{ p.name }}</strong>
+                                <span class="badge bg-secondary text-uppercase" style="font-size: 10px;">{{ p.type }}</span>
                             </div>
                             <div class="font-monospace small text-muted mt-1">
                                 {{ p.localHost || '127.0.0.1' }}:{{ p.localPort }} &rarr; {{ p.targetAddress }}:{{ p.targetPort }}
                             </div>
-                            <div class="small text-muted" *ngIf="p.description">{{ p.description }}</div>
+                            <div class="small text-secondary" *ngIf="p.description">{{ p.description }}</div>
                         </div>
                     </div>
 
                     <div class="d-flex align-items-center gap-1">
-                        <button class="btn btn-sm btn-link text-muted" [disabled]="i === 0" (click)="movePreset(i, -1)" title="Move up">
+                        <button class="btn btn-sm btn-link text-muted" [disabled]="i === 0" (click)="movePreset(i, -1)" title="Mover para cima">
                             <i class="fas fa-chevron-up"></i>
                         </button>
-                        <button class="btn btn-sm btn-link text-muted" [disabled]="i === presets.length - 1" (click)="movePreset(i, 1)" title="Move down">
+                        <button class="btn btn-sm btn-link text-muted" [disabled]="i === presets.length - 1" (click)="movePreset(i, 1)" title="Mover para baixo">
                             <i class="fas fa-chevron-down"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-primary ms-2" (click)="editPreset(p)" title="Edit">
+                        <button class="btn btn-sm btn-outline-primary ms-2" (click)="editPreset(p)" title="Editar">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-secondary" (click)="duplicatePreset(p)" title="Duplicate">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="duplicatePreset(p)" title="Duplicar">
                             <i class="fas fa-copy"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" (click)="deletePreset(i)" title="Delete">
+                        <button class="btn btn-sm btn-outline-danger" (click)="deletePreset(i)" title="Excluir">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
                 </li>
             </ul>
         </div>
-    `,
-    styles: [`
-        .preset-icon-box {
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-        }
-    `]
+
+        <!-- Edit Modal / Form Modal -->
+        <div class="card mt-4 border-primary bg-dark" *ngIf="editingPreset">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">{{ isNewPreset ? 'Criar Nova Predefinição' : 'Editar: ' + editingPreset.name }}</span>
+                <button type="button" class="btn-close btn-close-white" (click)="cancelEdit()"></button>
+            </div>
+            <div class="card-body p-3">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-light">Nome do Serviço</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-light" [(ngModel)]="editingPreset.name" placeholder="ex: PostgreSQL Produção">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-light">Tipo</label>
+                        <select class="form-select bg-dark border-secondary text-light" [(ngModel)]="editingPreset.type">
+                            <option value="local">Local</option>
+                            <option value="remote">Remoto</option>
+                            <option value="dynamic">Dinâmico (SOCKS5)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-light">Host Local (Bind)</label>
+                        <input type="text" class="form-control font-monospace bg-dark border-secondary text-light" [(ngModel)]="editingPreset.localHost" placeholder="127.0.0.1">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-light">Porta Local</label>
+                        <input type="number" class="form-control font-monospace bg-dark border-secondary text-light" [(ngModel)]="editingPreset.localPort" placeholder="5432">
+                    </div>
+                    <div class="col-md-6" *ngIf="editingPreset.type !== 'dynamic'">
+                        <label class="form-label small fw-bold text-light">Host e Porta de Destino</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control font-monospace bg-dark border-secondary text-light" [(ngModel)]="editingPreset.targetAddress" placeholder="127.0.0.1">
+                            <span class="input-group-text bg-dark border-secondary text-muted">:</span>
+                            <input type="number" class="form-control font-monospace bg-dark border-secondary text-light" [(ngModel)]="editingPreset.targetPort" placeholder="5432">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-light">Descrição</label>
+                    <input type="text" class="form-control bg-dark border-secondary text-light" [(ngModel)]="editingPreset.description" placeholder="Descrição opcional">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-light">Ícone do Serviço</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-2 rounded border border-secondary bg-black d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                            <quick-forward-icon [icon]="editingPreset.icon || ''" [size]="32"></quick-forward-icon>
+                        </div>
+                        <label class="btn btn-sm btn-outline-primary mb-0">
+                            <i class="fas fa-upload me-1"></i> Escolher arquivo SVG
+                            <input type="file" accept=".svg,.png,.webp" class="d-none" (change)="onSvgUpload($event)">
+                        </label>
+                        <input type="text" class="form-control form-control-sm bg-dark border-secondary text-light font-monospace flex-grow-1" 
+                               [(ngModel)]="fontAwesomeInput" (ngModelChange)="onFontAwesomeChange($event)" placeholder="Classe FontAwesome (ex: fas fa-database)...">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 pt-2 border-top border-secondary">
+                    <button class="btn btn-secondary" (click)="cancelEdit()">Cancelar</button>
+                    <button class="btn btn-primary" (click)="saveEdit()">Salvar Predefinição</button>
+                </div>
+            </div>
+        </div>
+    `
 })
 export class QuickPortForwardSettingsComponent {
-    loadingPresets = false
+    searchQuery = ''
+    loadingCatalog = false
     editingPreset: PortForwardPreset | null = null
     isNewPreset = false
+    fontAwesomeInput = ''
 
     constructor(
         public config: ConfigService,
@@ -221,6 +203,16 @@ export class QuickPortForwardSettingsComponent {
 
     get presets(): PortForwardPreset[] {
         return this.config.store?.plugin?.quickPortForward?.presets || []
+    }
+
+    get filteredPresets(): PortForwardPreset[] {
+        if (!this.searchQuery.trim()) return this.presets
+        const q = this.searchQuery.toLowerCase().trim()
+        return this.presets.filter(p => 
+            p.name.toLowerCase().includes(q) ||
+            String(p.localPort).includes(q) ||
+            (p.description && p.description.toLowerCase().includes(q))
+        )
     }
 
     saveConfig(): void {
@@ -234,10 +226,10 @@ export class QuickPortForwardSettingsComponent {
 
     newPreset(): void {
         this.isNewPreset = true
+        this.fontAwesomeInput = ''
         this.editingPreset = {
             id: Date.now().toString(),
             name: '',
-            category: 'Database',
             type: 'local',
             localHost: '127.0.0.1',
             localPort: 8080,
@@ -251,16 +243,21 @@ export class QuickPortForwardSettingsComponent {
     editPreset(preset: PortForwardPreset): void {
         this.isNewPreset = false
         this.editingPreset = JSON.parse(JSON.stringify(preset))
+        if (preset.icon && !preset.icon.trim().startsWith('<svg')) {
+            this.fontAwesomeInput = preset.icon
+        } else {
+            this.fontAwesomeInput = ''
+        }
     }
 
     duplicatePreset(preset: PortForwardPreset): void {
         const copy: PortForwardPreset = JSON.parse(JSON.stringify(preset))
         copy.id = Date.now().toString()
-        copy.name += ' (Copy)'
+        copy.name += ' (Cópia)'
         copy.localPort += 1
         const list = [...this.presets, copy]
         this.forwardService.savePresets(list)
-        this.toastr.info('Preset duplicated')
+        this.toastr.info('Predefinição duplicada')
     }
 
     cancelEdit(): void {
@@ -271,11 +268,11 @@ export class QuickPortForwardSettingsComponent {
     saveEdit(): void {
         if (!this.editingPreset) return
         if (!this.editingPreset.name.trim()) {
-            this.toastr.warning('Please enter a preset name')
+            this.toastr.warning('Por favor, informe um nome')
             return
         }
         if (!this.editingPreset.localPort) {
-            this.toastr.warning('Please enter a local port')
+            this.toastr.warning('Por favor, informe a porta local')
             return
         }
 
@@ -284,13 +281,11 @@ export class QuickPortForwardSettingsComponent {
             current.push(this.editingPreset)
         } else {
             const idx = current.findIndex(p => p.id === this.editingPreset!.id)
-            if (idx !== -1) {
-                current[idx] = this.editingPreset
-            }
+            if (idx !== -1) current[idx] = this.editingPreset
         }
 
         this.forwardService.savePresets(current)
-        this.toastr.success('Preset saved successfully!')
+        this.toastr.success('Predefinição salva!')
         this.cancelEdit()
     }
 
@@ -298,7 +293,7 @@ export class QuickPortForwardSettingsComponent {
         const current = [...this.presets]
         current.splice(index, 1)
         this.forwardService.savePresets(current)
-        this.toastr.info('Preset removed')
+        this.toastr.info('Predefinição excluída')
     }
 
     movePreset(index: number, delta: number): void {
@@ -310,8 +305,8 @@ export class QuickPortForwardSettingsComponent {
         this.forwardService.savePresets(current)
     }
 
-    async downloadPresets(): Promise<void> {
-        this.loadingPresets = true
+    async downloadAllFromGitHub(): Promise<void> {
+        this.loadingCatalog = true
         try {
             const downloaded = await this.forwardService.fetchPresetsFromGitHub()
             const current = [...this.presets]
@@ -323,11 +318,40 @@ export class QuickPortForwardSettingsComponent {
                 }
             }
             this.forwardService.savePresets(current)
-            this.toastr.success(`Successfully downloaded ${count} new presets!`)
+            this.toastr.success(`${count} serviços adicionados com sucesso!`)
         } catch (err: any) {
-            this.toastr.error(`Failed to download presets: ${err.message || err}`)
+            this.toastr.error(`Falha ao baixar catálogo: ${err.message || err}`)
         } finally {
-            this.loadingPresets = false
+            this.loadingCatalog = false
+        }
+    }
+
+    onSvgUpload(event: any): void {
+        const file = event.target.files && event.target.files[0]
+        if (!file || !this.editingPreset) return
+        const reader = new FileReader()
+        reader.onload = (e: any) => {
+            const content = e.target.result
+            if (typeof content === 'string' && content.includes('<svg')) {
+                this.editingPreset!.icon = content.substring(content.indexOf('<svg'))
+                this.fontAwesomeInput = ''
+                this.toastr.success('Ícone SVG carregado!')
+            } else {
+                this.editingPreset!.icon = `<img src="${content}" style="width:100%;height:100%;object-fit:contain;"/>`
+                this.fontAwesomeInput = ''
+            }
+        }
+        if (file.type === 'image/svg+xml' || file.name.endsWith('.svg')) {
+            reader.readAsText(file)
+        } else {
+            reader.readAsDataURL(file)
+        }
+        event.target.value = ''
+    }
+
+    onFontAwesomeChange(val: string): void {
+        if (this.editingPreset && val && val.trim()) {
+            this.editingPreset.icon = val.trim()
         }
     }
 
@@ -358,10 +382,10 @@ export class QuickPortForwardSettingsComponent {
                         }
                     }
                     this.forwardService.savePresets(current)
-                    this.toastr.success(`Imported ${count} presets successfully!`)
+                    this.toastr.success(`${count} predefinições importadas com sucesso!`)
                 }
-            } catch (err: any) {
-                this.toastr.error('Invalid JSON file format')
+            } catch {
+                this.toastr.error('Formato de arquivo JSON inválido.')
             }
         }
         reader.readAsText(file)

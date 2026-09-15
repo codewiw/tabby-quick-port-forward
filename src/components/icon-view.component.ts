@@ -7,7 +7,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
         <div class="quick-forward-icon-container" [style.width.px]="size" [style.height.px]="size">
             <div *ngIf="isSvg" class="svg-wrapper" [innerHTML]="safeSvg"></div>
             <i *ngIf="!isSvg && icon" [class]="icon" [style.font-size.px]="size * 0.8"></i>
-            <i *ngIf="!icon" class="fas fa-plug" [style.font-size.px]="size * 0.8"></i>
+            <i *ngIf="!icon" class="fas fa-plug text-primary" [style.font-size.px]="size * 0.8"></i>
         </div>
     `,
     styles: [`
@@ -28,14 +28,15 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
         .svg-wrapper ::ng-deep svg {
             width: 100%;
             height: 100%;
-            fill: currentColor;
             display: block;
+            max-width: 100%;
+            max-height: 100%;
         }
     `]
 })
 export class QuickForwardIconComponent {
     @Input() icon: string = ''
-    @Input() size: number = 20
+    @Input() size: number = 24
 
     constructor(private sanitizer: DomSanitizer) {}
 

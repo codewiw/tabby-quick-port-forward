@@ -2,155 +2,131 @@
     {
         "id": "postgres",
         "name": "PostgreSQL",
-        "category": "Database",
         "type": "local",
         "localPort": 5432,
         "targetAddress": "127.0.0.1",
         "targetPort": 5432,
-        "description": "PostgreSQL Relational Database",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z\"/></svg>"
+        "description": "Banco de dados relacional PostgreSQL",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#336791\" d=\"M98.6 37.6c-1.2-4.8-3.4-9.3-6.6-13.1-6.1-7.2-14.8-11.7-24.2-12.5-12.7-1.1-25.1 4.7-32.6 15-7.5 10.3-9.5 23.8-5.3 35.8 3.5 10 11.2 18 21.1 21.9 2.5 1 5.2 1.7 7.9 2.1l-.3 3.6c-.6 6.3-1.6 12.5-3 18.7-.3 1.3.6 2.6 1.9 2.9 1.3.3 2.6-.6 2.9-1.9 1.5-6.5 2.5-13.1 3.2-19.7l.4-4.2c3.5-.2 6.9-.9 10.2-2.1 11.7-4.2 20.6-14 23.6-26.2 1.2-4.8 1.4-9.8.8-10.4zm-14.2 32.2c-2.4 9.6-9.4 17.3-18.7 20.5-2.6.9-5.4 1.5-8.1 1.7-.8.1-1.6-.5-1.7-1.3-.1-.8.5-1.6 1.3-1.7 2.6-.2 5.1-.7 7.6-1.6 8.7-3 15.2-10.2 17.5-19.2 1-3.9.8-7.9-.5-11.7-.3-.8.2-1.7 1-1.9.8-.3 1.7.2 1.9 1 1.5 4.5 1.7 9.2.7 13.7z\"/><path fill=\"#fff\" d=\"M51.8 45.4c-1.8 0-3.3 1.5-3.3 3.3s1.5 3.3 3.3 3.3 3.3-1.5 3.3-3.3-1.5-3.3-3.3-3.3zm24.4 0c-1.8 0-3.3 1.5-3.3 3.3s1.5 3.3 3.3 3.3 3.3-1.5 3.3-3.3-1.5-3.3-3.3-3.3z\"/><path fill=\"#336791\" d=\"M51.8 47.1c-.9 0-1.6.7-1.6 1.6s.7 1.6 1.6 1.6 1.6-.7 1.6-1.6-.7-1.6-1.6-1.6zm24.4 0c-.9 0-1.6.7-1.6 1.6s.7 1.6 1.6 1.6 1.6-.7 1.6-1.6-.7-1.6-1.6-1.6z\"/></svg>"
     },
     {
         "id": "mongodb",
         "name": "MongoDB",
-        "category": "Database",
         "type": "local",
         "localPort": 27017,
         "targetAddress": "127.0.0.1",
         "targetPort": 27017,
-        "description": "MongoDB Document Database",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2.2c-.4 0-.8.2-1.1.5C9.4 4.2 4 10.7 4 15.5 4 19.6 7.6 23 12 23s8-3.4 8-7.5c0-4.8-5.4-11.3-6.9-12.8-.3-.3-.7-.5-1.1-.5zm0 2.8c1.3 1.5 5.5 6.7 5.5 10.5 0 2.8-2.5 5-5.5 5s-5.5-2.2-5.5-5c0-3.8 4.2-9 5.5-10.5z\"/></svg>"
+        "description": "Banco NoSQL MongoDB Document Store",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#13AA52\" d=\"M64.7 125.7c-3.1-6.4-12.8-26.6-13.8-30.8-7.8-31.9 5.8-59 13.8-92.4 8 33.4 21.6 60.5 13.8 92.4-.9 4.2-10.7 24.4-13.8 30.8z\"/><path fill=\"#116149\" d=\"M64.7 2.5c-.2 0-.3.1-.4.2-8 33.4-21.6 60.5-13.8 92.4 1 4.2 10.7 24.4 13.8 30.8.1.3.4.3.4.3V2.5z\"/></svg>"
     },
     {
         "id": "redis",
         "name": "Redis",
-        "category": "Database / Cache",
         "type": "local",
         "localPort": 6379,
         "targetAddress": "127.0.0.1",
         "targetPort": 6379,
-        "description": "Redis In-Memory Key-Value Store",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\"/></svg>"
+        "description": "Armazenamento em memória Redis Key-Value",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#D82C20\" d=\"M114.5 73.1L64 97.4 13.5 73.1l8.3-25.1L64 71.3l42.2-23.3 8.3 25.1z\"/><path fill=\"#A3241A\" d=\"M114.5 49.3L64 73.6 13.5 49.3l8.3-25.1L64 47.5l42.2-23.3 8.3 25.1z\"/><path fill=\"#D82C20\" d=\"M114.5 96.9L64 121.2 13.5 96.9l8.3-25.1L64 95.1l42.2-23.3 8.3 25.1z\"/></svg>"
     },
     {
         "id": "rabbitmq-amqp",
         "name": "RabbitMQ (AMQP)",
-        "category": "Message Broker",
         "type": "local",
         "localPort": 5672,
         "targetAddress": "127.0.0.1",
         "targetPort": 5672,
-        "description": "RabbitMQ AMQP Messaging Protocol",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z\"/></svg>"
+        "description": "Fila de mensageria RabbitMQ AMQP",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#FF6600\" d=\"M114.6 72.8c-1.4-14.7-12.8-26.3-27.2-27.4-4.8-.4-9.5.6-13.8 2.7l-4.5-23.3c-.6-3.2-3.6-5.4-6.8-4.8-3.2.6-5.4 3.6-4.8 6.8l3.6 18.6c-2.4 1.4-4.7 3.1-6.7 5.1L39.8 36.3c-2.3-2.3-6.1-2.3-8.5 0-2.3 2.3-2.3 6.1 0 8.5l14.1 14.1c-4.4 7.6-6 16.6-4.1 25.6 3.6 17.5 18.5 30.6 36.4 31.8 19.3 1.3 35.9-12.9 38.3-32.2.3-3.8.1-7.5-1.4-11.3zm-39.8 3.5c-3.7 0-6.7-3-6.7-6.7s3-6.7 6.7-6.7 6.7 3 6.7 6.7-3 6.7-6.7 6.7z\"/></svg>"
     },
     {
         "id": "rabbitmq-web",
         "name": "RabbitMQ (Management)",
-        "category": "Message Broker",
         "type": "local",
         "localPort": 15672,
         "targetAddress": "127.0.0.1",
         "targetPort": 15672,
-        "description": "RabbitMQ Web Management Dashboard",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M4 6h16v12H4z\" fill=\"none\"/><path d=\"M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-6-4H6v-2h8v2z\"/></svg>"
+        "description": "Painel Web de Administração do RabbitMQ",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#FF6600\" d=\"M114.6 72.8c-1.4-14.7-12.8-26.3-27.2-27.4-4.8-.4-9.5.6-13.8 2.7l-4.5-23.3c-.6-3.2-3.6-5.4-6.8-4.8-3.2.6-5.4 3.6-4.8 6.8l3.6 18.6c-2.4 1.4-4.7 3.1-6.7 5.1L39.8 36.3c-2.3-2.3-6.1-2.3-8.5 0-2.3 2.3-2.3 6.1 0 8.5l14.1 14.1c-4.4 7.6-6 16.6-4.1 25.6 3.6 17.5 18.5 30.6 36.4 31.8 19.3 1.3 35.9-12.9 38.3-32.2.3-3.8.1-7.5-1.4-11.3zm-39.8 3.5c-3.7 0-6.7-3-6.7-6.7s3-6.7 6.7-6.7 6.7 3 6.7 6.7-3 6.7-6.7 6.7z\"/><circle cx=\"42\" cy=\"96\" r=\"6\" fill=\"#333\"/></svg>"
     },
     {
         "id": "mysql",
         "name": "MySQL / MariaDB",
-        "category": "Database",
         "type": "local",
         "localPort": 3306,
         "targetAddress": "127.0.0.1",
         "targetPort": 3306,
-        "description": "MySQL / MariaDB Relational Database",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 3C7.58 3 4 4.79 4 7v10c0 2.21 3.58 4 8 4s8-1.79 8-4V7c0-2.21-3.58-4-8-4zm0 2c3.87 0 6 1.5 6 2s-2.13 2-6 2-6-1.5-6-2 2.13-2 6-2zm6 12c0 .5-2.13 2-6 2s-6-1.5-6-2v-2.23c1.61.78 3.72 1.23 6 1.23s4.39-.45 6-1.23V17zm0-3.5c0 .5-2.13 2-6 2s-6-1.5-6-2v-2.23c1.61.78 3.72 1.23 6 1.23s4.39-.45 6-1.23v2.23z\"/></svg>"
+        "description": "Banco de dados relacional MySQL / MariaDB",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#00758F\" d=\"M117.8 77.5c-3.2-5.4-9.3-9.5-16.1-11.1 2.3-6.8 1.9-14.6-1.5-21.3-4.8-9.4-13.9-15.5-24.3-16.7-6.3-.7-12.8.5-18.4 3.6-3.7-2.9-8.3-4.7-13.3-4.9-7.7-.3-15 3.3-19.8 9.3C18.2 44 14.9 53 15 62.2c.1 6.5 1.9 13 5.4 18.6 3.8 6.1 9.4 10.8 16 13.4 5.9 2.3 12.5 2.7 18.7 1.2 5.1-1.2 9.9-3.7 13.8-7.3 6.3 3.6 13.8 5.1 21.1 4.2 9.4-1.2 18-6.6 23.4-14.4 2.1-3.1 3.5-6.6 4.4-10.4z\"/><path fill=\"#F29111\" d=\"M78.6 45.4c-2.1-2.9-5.1-5.1-8.6-6.1 1.2 3.1 1.5 6.6.8 9.9-.4 2-.8 3.5-1.5 4.8 3.4-1.8 6.9-4.8 9.3-8.6z\"/></svg>"
     },
     {
         "id": "khomp-web",
         "name": "Khomp (Web Admin)",
-        "category": "Telephony",
         "type": "local",
         "localPort": 8080,
         "targetAddress": "127.0.0.1",
         "targetPort": 80,
-        "description": "Khomp Telephony Gateway Web Admin",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20 15.5c-1.25 0-2.45-.2-3.57-.57-.35-.11-.74-.03-1.02.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21c.28-.27.36-.66.25-1.01A11.36 11.36 0 018.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1zM19 12h2c0-4.97-4.03-9-9-9v2c3.87 0 7 3.13 7 7zm-4 0h2c0-2.76-2.24-5-5-5v2c1.66 0 3 1.34 3 3z\"/></svg>"
+        "description": "Painel Web do Gateway / EBS Khomp",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><rect width=\"120\" height=\"120\" x=\"4\" y=\"4\" rx=\"24\" fill=\"#E30613\"/><path fill=\"#fff\" d=\"M34 32h16v24.5L72.5 32H94L66.5 61.5 96 96H74L50 67v29H34V32z\"/></svg>"
     },
     {
         "id": "khomp-sip",
-        "name": "Khomp (SIP Signaling)",
-        "category": "Telephony",
+        "name": "Khomp (Sinalização SIP)",
         "type": "local",
         "localPort": 5060,
         "targetAddress": "127.0.0.1",
         "targetPort": 5060,
-        "description": "Khomp SIP Telephony Signaling Port",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z\"/></svg>"
-    },
-    {
-        "id": "elasticsearch",
-        "name": "Elasticsearch",
-        "category": "Search / Analytics",
-        "type": "local",
-        "localPort": 9200,
-        "targetAddress": "127.0.0.1",
-        "targetPort": 9200,
-        "description": "Elasticsearch REST API",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z\"/></svg>"
+        "description": "Porta de sinalização VoIP/SIP Khomp",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><rect width=\"120\" height=\"120\" x=\"4\" y=\"4\" rx=\"24\" fill=\"#1B365D\"/><path fill=\"#E30613\" d=\"M34 32h16v24.5L72.5 32H94L66.5 61.5 96 96H74L50 67v29H34V32z\"/><circle cx=\"98\" cy=\"30\" r=\"10\" fill=\"#4CAF50\"/></svg>"
     },
     {
         "id": "docker",
         "name": "Docker Daemon",
-        "category": "Containers",
         "type": "local",
         "localPort": 2375,
         "targetAddress": "127.0.0.1",
         "targetPort": 2375,
-        "description": "Docker Daemon REST API",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M13 13v-3h3v3h-3zm-4 0v-3h3v3H9zm-4 0v-3h3v3H5zm8-4V6h3v3h-3zm-4 0V6h3v3H9zm13 4c-.2-1.3-1.1-2.4-2.3-2.8-.2-.7-.6-1.3-1.2-1.7-.1 0-.3-.1-.4-.1H18V6c0-.6-.4-1-1-1h-9c-.6 0-1 .4-1 1v4H5c-.6 0-1 .4-1 1v3H3c-.6 0-1 .4-1 1 0 4.4 3.6 8 8 8h6c4.4 0 8-3.6 8-8 0-.4-.1-.7-.2-1h-1.8z\"/></svg>"
+        "description": "API REST Remota do Docker Daemon",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#2496ED\" d=\"M121.2 59.8c-1.6-1.1-5.1-1.7-8.3-.9-.6-5.1-4.2-9.4-9.3-10.7-.5 0-1-.1-1.5-.1-1.2 0-2.4.2-3.5.7-4.1-6.5-11.2-10.7-19-11.1H79v21.5H57.5V48H46.7v11.2H36V48H25.2v11.2H14.5V48H3.8v11.2c0 23.4 19 42.4 42.4 42.4 22.9 0 41.7-18.2 42.4-41 1.7-.8 3.5-1.5 5.5-1.9 4.8-1 9.9.5 13.9 3.8 2.2-1.9 3.6-4.6 3.6-7.7-.2-2.3-1.6-4.8-3.4-6.2zM21.5 44.4h7.2v7.2h-7.2zm10.7 0h7.2v7.2h-7.2zm10.8 0h7.2v7.2H43zm10.7 0h7.2v7.2h-7.2zm10.8 0h7.2v7.2h-7.2zm-21.5-10.8h7.2v7.2h-7.2zm10.7 0h7.2v7.2h-7.2zm10.8 0h7.2v7.2H65z\"/></svg>"
     },
     {
-        "id": "kafka",
-        "name": "Apache Kafka",
-        "category": "Message Broker",
+        "id": "elasticsearch",
+        "name": "Elasticsearch",
         "type": "local",
-        "localPort": 9092,
+        "localPort": 9200,
         "targetAddress": "127.0.0.1",
-        "targetPort": 9092,
-        "description": "Apache Kafka Streaming Platform",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5zm4 4h-2V7h2v9z\"/></svg>"
-    },
-    {
-        "id": "grafana",
-        "name": "Grafana",
-        "category": "Monitoring",
-        "type": "local",
-        "localPort": 3000,
-        "targetAddress": "127.0.0.1",
-        "targetPort": 3000,
-        "description": "Grafana Analytics & Monitoring",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z\"/></svg>"
+        "targetPort": 9200,
+        "description": "API REST de busca e indexação Elasticsearch",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#FED10A\" d=\"M59.6 15.6L20.8 38c-2.3 1.3-3.7 3.8-3.7 6.5v44.8c0 2.7 1.4 5.1 3.7 6.5l38.8 22.4c2.3 1.3 5.2 1.3 7.5 0l38.8-22.4c2.3-1.3 3.7-3.8 3.7-6.5V44.5c0-2.7-1.4-5.1-3.7-6.5L67.1 15.6c-2.3-1.3-5.2-1.3-7.5 0z\"/><path fill=\"#005571\" d=\"M63.4 34L35.2 50.3v33.2l28.2 16.3 28.2-16.3V50.3L63.4 34z\"/><path fill=\"#00BFB3\" d=\"M63.4 46L45.5 56.3v21.2l17.9 10.3 17.9-10.3V56.3L63.4 46z\"/></svg>"
     },
     {
         "id": "minio-api",
         "name": "MinIO (S3 API)",
-        "category": "Storage",
         "type": "local",
         "localPort": 9000,
         "targetAddress": "127.0.0.1",
         "targetPort": 9000,
-        "description": "MinIO Object Storage S3 API",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z\"/></svg>"
+        "description": "Armazenamento de Objetos S3 MinIO API",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><rect width=\"120\" height=\"120\" x=\"4\" y=\"4\" rx=\"24\" fill=\"#C72C48\"/><path fill=\"#fff\" d=\"M28 88V40h14l22 26 22-26h14v48H86V60L64 84 42 60v28H28z\"/></svg>"
     },
     {
         "id": "minio-console",
-        "name": "MinIO (Console)",
-        "category": "Storage",
+        "name": "MinIO (Console Web)",
         "type": "local",
         "localPort": 9001,
         "targetAddress": "127.0.0.1",
         "targetPort": 9001,
-        "description": "MinIO Web Management Console",
-        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z\"/></svg>"
+        "description": "Console Web de Gerenciamento MinIO",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><rect width=\"120\" height=\"120\" x=\"4\" y=\"4\" rx=\"24\" fill=\"#C72C48\"/><path fill=\"#fff\" d=\"M28 88V40h14l22 26 22-26h14v48H86V60L64 84 42 60v28H28z\"/><circle cx=\"96\" cy=\"32\" r=\"10\" fill=\"#FFD700\"/></svg>"
+    },
+    {
+        "id": "grafana",
+        "name": "Grafana Dashboard",
+        "type": "local",
+        "localPort": 3000,
+        "targetAddress": "127.0.0.1",
+        "targetPort": 3000,
+        "description": "Dashboard de Métricas e Observabilidade Grafana",
+        "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><path fill=\"#F46800\" d=\"M98.8 69.4c-.4 6-2.5 11.8-6.1 16.7-5.1 7-12.7 11.5-21.2 12.8-8.5 1.3-17.1-.8-24.1-5.9-7-5.1-11.5-12.7-12.8-21.2-1.3-8.5.8-17.1 5.9-24.1 5.1-7 12.7-11.5 21.2-12.8 3.5-.5 7-.4 10.4.4l-4.7 9.8c-1.9-.3-3.9-.3-5.8 0-5.4.8-10.2 3.7-13.4 8.1-3.2 4.4-4.5 9.9-3.7 15.3.8 5.4 3.7 10.2 8.1 13.4 4.4 3.2 9.9 4.5 15.3 3.7 5.4-.8 10.2-3.7 13.4-8.1 2.3-3.2 3.6-7 3.8-10.8l13.7 2.8z\"/></svg>"
     }
 ]
