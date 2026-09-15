@@ -1,66 +1,43 @@
 # Tabby Quick Port Forward
 
-SSH Port Forwarding management plugin for [Tabby Terminal](https://tabby.sh).
+SSH port forwarding plugin for [Tabby](https://tabby.sh) with presets and service icons.
 
-Repository: [https://github.com/codewiw/tabby-quick-port-forward](https://github.com/codewiw/tabby-quick-port-forward)
-
-Provides reusable port forwarding presets with authentic brand icons and one-click connection toggling for active SSH sessions.
-
-## Screenshots
-
-### Port Forwarding Manager
-![Port Forwarding Manager](docs/screenshots/modal-tunnels.png)
-
-### Adding a New Preset from Catalog
-![Add Tunnel](docs/screenshots/modal-add.png)
-
-### Settings and Preset Library
-![Settings Dashboard](docs/screenshots/settings.png)
+![Port Forwarding](docs/screenshots/modal-tunnels.png)
 
 ## Features
 
-- **One-Click Tunnels**: Start and stop port forwards directly on the active SSH session.
-- **Service Catalog**: Includes official monochrome vector icons and default ports for 30+ popular database, messaging, observability, and DevOps services.
-- **GitHub Catalog Sync**: Built-in synchronization to fetch and update service presets directly from GitHub.
-- **Customizable Services**: Add, edit, duplicate, or reorder presets with custom SVG icons or FontAwesome classes.
-- **Native SSH Toolbar Integration**: Intercepts the native Tabby "Ports" button on the terminal toolbar without adding clutter to the window titlebar.
-- **Configuration Dashboard**: Manage presets, backup, and restore configurations via JSON import and export in Tabby Settings.
+- Start and stop SSH tunnels with one click
+- Presets for popular services (PostgreSQL, MySQL, Redis, MongoDB, Docker, Nginx, etc.)
+- Add custom services with SVG or FontAwesome icons
+- Fetch catalog updates from GitHub
+- Import and export presets (JSON)
+- Integrated directly into the SSH session toolbar
+
+## Screenshots
+
+| My Tunnels | Add Tunnel | Settings |
+|:---:|:---:|:---:|
+| ![My Tunnels](docs/screenshots/modal-tunnels.png) | ![Add Tunnel](docs/screenshots/modal-add.png) | ![Settings](docs/screenshots/settings.png) |
 
 ## Installation
 
-### Via Tabby Plugin Manager (Recommended)
-1. In Tabby, open **Settings** > **Plugins**.
-2. Search for `tabby-quick-port-forward`.
-3. Click **Install** and restart or reload Tabby (`Ctrl + Shift + R`).
+In Tabby:
+1. Open **Settings** > **Plugins**
+2. Search for `tabby-quick-port-forward`
+3. Click **Install**
 
-### Manual Installation
-Clone this repository into Tabby's plugin directory:
+### Manual
 
-**Windows (PowerShell):**
-```powershell
-cd "$env:APPDATA\tabby\plugins\node_modules"
-git clone https://github.com/codewiw/tabby-quick-port-forward.git
-cd tabby-quick-port-forward
-npm install --production
-```
-
-**Linux / macOS:**
 ```bash
+# Linux / macOS:
 cd ~/.config/tabby/plugins/node_modules
 git clone https://github.com/codewiw/tabby-quick-port-forward.git
-cd tabby-quick-port-forward
-npm install --production
+
+# Windows (PowerShell):
+cd "$env:APPDATA\tabby\plugins\node_modules"
+git clone https://github.com/codewiw/tabby-quick-port-forward.git
 ```
-
-## Usage
-
-1. Open any SSH session tab in Tabby.
-2. Click the **Ports** button on the bottom terminal toolbar.
-3. In the modal:
-   - **My Tunnels**: Start or stop configured tunnels with one click.
-   - **Add Tunnel**: Select a service from the official catalog or define custom parameters (Host, Local Port, Target Port, Icon).
-   - **Edit Tunnel**: Modify existing tunnel definitions in a dedicated tab without interrupting workflow.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+[MIT](LICENSE)
