@@ -42,19 +42,14 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
             </div>
             <div class="card-body p-3">
                 <!-- Select from catalog if new -->
-                <div class="mb-3 p-2 rounded bg-black bg-opacity-30 border border-secondary" *ngIf="isNewPreset && catalogPresets.length > 0">
-                    <label class="form-label small fw-bold text-light mb-1">
-                        <i class="fas fa-cubes text-info me-1"></i> Preencher a partir do Catálogo Oficial (Opcional):
-                    </label>
-                    <div class="d-flex flex-wrap gap-1 mt-1">
-                        <button *ngFor="let item of catalogPresets" 
-                                type="button" 
-                                class="btn btn-sm btn-outline-secondary py-0 px-2 text-light"
-                                (click)="selectCatalogForEdit(item)">
-                            <quick-forward-icon [icon]="item.icon || ''" [size]="16" class="me-1"></quick-forward-icon>
-                            <span style="font-size: 11px;">{{ item.name }}</span>
-                        </button>
-                    </div>
+                <div class="mb-3" *ngIf="isNewPreset && catalogPresets.length > 0">
+                    <label class="form-label small fw-bold text-light">Preencher a partir do Catálogo Oficial:</label>
+                    <select class="form-select form-select-sm" (change)="onCatalogSelect($event)">
+                        <option value="">Escolher serviço predefinido (PostgreSQL, Redis, MongoDB, Khomp, Docker...)...</option>
+                        <option *ngFor="let item of catalogPresets" [value]="item.id">
+                            {{ item.name }} (Porta padrão: {{ item.localPort }})
+                        </option>
+                    </select>
                 </div>
 
                 <div class="row g-3 mb-3">
@@ -76,12 +71,12 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
                 <div class="row g-3 mb-3">
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-light">Host Local</label>
-                        <input type="text" class="form-control form-control-sm font-monospace bg-dark border-secondary text-light" 
+                        <input type="text" class="form-control font-monospace form-control-sm bg-dark border-secondary text-light" 
                                [(ngModel)]="editingPreset.localHost" placeholder="127.0.0.1">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-light">Porta Local</label>
-                        <input type="number" class="form-control form-control-sm font-monospace bg-dark border-secondary text-light" 
+                        <input type="number" class="form-control font-monospace form-control-sm bg-dark border-secondary text-light" 
                                [(ngModel)]="editingPreset.localPort" placeholder="5432">
                     </div>
                     <div class="col-md-6" *ngIf="editingPreset.type !== 'dynamic'">
@@ -105,9 +100,9 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-light">Ícone</label>
                     <div class="d-flex align-items-center gap-3">
-                        <div class="p-2 rounded border border-secondary bg-black d-flex align-items-center justify-content-center text-light" 
-                             style="width: 42px; height: 42px;">
-                            <quick-forward-icon [icon]="editingPreset.icon || ''" [size]="28"></quick-forward-icon>
+                        <div class="p-1 rounded border border-secondary bg-black d-flex align-items-center justify-content-center text-light" 
+                             style="width: 38px; height: 38px;">
+                            <quick-forward-icon [icon]="editingPreset.icon || ''" [size]="24"></quick-forward-icon>
                         </div>
 
                         <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer">
@@ -118,7 +113,7 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
                         <input type="text" class="form-control form-control-sm bg-dark border-secondary text-light font-monospace flex-grow-1" 
                                [(ngModel)]="fontAwesomeInput" 
                                (ngModelChange)="onFontAwesomeChange($event)" 
-                               placeholder="Ou digite classe FontAwesome (ex: fas fa-database)...">
+                               placeholder="Ou digite classe FontAwesome (ex: fas fa-database, fa-server)...">
                     </div>
                 </div>
 
@@ -154,11 +149,11 @@ export class QuickPortForwardSettingsTabProvider extends SettingsTabProvider {
             <!-- List of Presets -->
             <ul class="list-group list-group-flush" *ngIf="presets.length > 0">
                 <li *ngFor="let p of filteredPresets; let i = index" 
-                    class="list-group-item bg-transparent border-secondary d-flex align-items-center justify-content-between p-2 px-3">
+                    class="list-group-item bg-transparent border-secondary d-flex align-items-center justify-content-between py-2 px-3">
                     <div class="d-flex align-items-center flex-grow-1 me-3 text-truncate">
                         <div class="me-3 p-1 rounded border border-secondary bg-black d-flex align-items-center justify-content-center text-light" 
-                             style="width: 36px; height: 36px;">
-                            <quick-forward-icon [icon]="p.icon || ''" [size]="24"></quick-forward-icon>
+                             style="width: 32px; height: 32px;">
+                            <quick-forward-icon [icon]="p.icon || ''" [size]="22"></quick-forward-icon>
                         </div>
                         <div class="text-truncate">
                             <div class="d-flex align-items-center gap-2">
@@ -245,17 +240,22 @@ export class QuickPortForwardSettingsComponent implements OnInit {
         }
     }
 
-    selectCatalogForEdit(item: PortForwardPreset): void {
-        if (!this.editingPreset) return
-        this.editingPreset.name = item.name
-        this.editingPreset.type = item.type || 'local'
-        this.editingPreset.localHost = item.localHost || '127.0.0.1'
-        this.editingPreset.localPort = item.localPort
-        this.editingPreset.targetAddress = item.targetAddress || '127.0.0.1'
-        this.editingPreset.targetPort = item.targetPort
-        this.editingPreset.description = item.description || ''
-        this.editingPreset.icon = item.icon || 'fas fa-plug'
-        this.fontAwesomeInput = ''
+    onCatalogSelect(event: any): void {
+        const id = event.target.value
+        if (!id || !this.editingPreset) return
+        const item = this.catalogPresets.find(p => p.id === id)
+        if (item) {
+            this.editingPreset.name = item.name
+            this.editingPreset.type = item.type || 'local'
+            this.editingPreset.localHost = item.localHost || '127.0.0.1'
+            this.editingPreset.localPort = item.localPort
+            this.editingPreset.targetAddress = item.targetAddress || '127.0.0.1'
+            this.editingPreset.targetPort = item.targetPort
+            this.editingPreset.description = item.description || ''
+            this.editingPreset.icon = item.icon || 'fas fa-plug'
+            this.fontAwesomeInput = ''
+        }
+        event.target.value = ''
     }
 
     editPreset(preset: PortForwardPreset): void {
@@ -334,7 +334,7 @@ export class QuickPortForwardSettingsComponent implements OnInit {
                 this.fontAwesomeInput = ''
                 this.toastr.success('Ícone SVG carregado!')
             } else {
-                this.editingPreset!.icon = `<img src="${content}" style="width:100%;height:100%;object-fit:contain;"/>`
+                this.editingPreset!.icon = content
                 this.fontAwesomeInput = ''
             }
         }

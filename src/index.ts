@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule, NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { ToastrModule } from 'ngx-toastr'
-import TabbyCoreModule, { ConfigProvider, ToolbarButtonProvider, TranslateService, AppService } from 'tabby-core'
+import TabbyCoreModule, { ConfigProvider, TranslateService, AppService } from 'tabby-core'
 import { SettingsTabProvider } from 'tabby-settings'
 
 import { QuickPortForwardConfigProvider } from './config'
-import { QuickPortForwardToolbarButtonProvider } from './toolbar-button.provider'
 import { QuickPortForwardSettingsComponent, QuickPortForwardSettingsTabProvider } from './components/settings.component'
 import { QuickPortForwardModalComponent } from './components/forward-modal.component'
 import { QuickForwardIconComponent } from './components/icon-view.component'
@@ -34,7 +33,6 @@ import { TRANSLATIONS } from './translations'
     providers: [
         { provide: ConfigProvider, useClass: QuickPortForwardConfigProvider, multi: true },
         { provide: SettingsTabProvider, useClass: QuickPortForwardSettingsTabProvider, multi: true },
-        { provide: ToolbarButtonProvider, useClass: QuickPortForwardToolbarButtonProvider, multi: true },
         QuickPortForwardService,
     ],
 })
@@ -45,7 +43,7 @@ export default class QuickPortForwardModule {
         translate: TranslateService,
         forwardService: QuickPortForwardService,
     ) {
-        // Register Portuguese and English translations
+        // Register translations
         for (const [lang, trans] of Object.entries(TRANSLATIONS)) {
             translate.setTranslation(lang, trans, true)
         }
@@ -56,11 +54,38 @@ export default class QuickPortForwardModule {
             modal.componentInstance.session = session
         }
 
-        // Hook function to patch SSH tab instances and their prototypes
-        const hookSshTab = (tab: any) => {
-            if (!tab) return
+        // 1. DOM Capture-phase interception on the server's taskbar "Ports" button!
+        // This guarantees that whenever the user clicks the "Ports" button in the SSH tab's toolbar,
+        // it intercepts the click BEFORE the native modal can open, and opens our enhanced modal!
+        if (typeof document !== 'undefined') {
+            document.addEventListener('click', (event: MouseEvent) => {
+                const target = (event.target as HTMLElement)?.closest('button')
+                if (!target) return
 
-            // Patch instance
+                const isPortsBtn = target.querySelector('.fa-plug') || 
+                                   target.innerText?.includes('Ports') || 
+                                   target.innerText?.includes('Portas')
+
+                const isInServerBar = target.closest('terminal-toolbar') || 
+                                      target.closest('ssh-tab') ||
+                                      target.parentElement?.tagName.toLowerCase() === 'terminal-toolbar'
+
+                if (isPortsBtn && isInServerBar) {
+                    event.preventDefault()
+                    event.stopImmediatePropagation()
+                    event.stopPropagation()
+
+                    const session = forwardService.getActiveSSHSession()
+                    if (session) {
+                        openEnhancedModal(session)
+                    }
+                }
+            }, true) // TRUE = CAPTURE PHASE!
+        }
+
+        // 2. Also patch SSHTabComponent.prototype if available
+        const hookTab = (tab: any) => {
+            if (!tab) return
             if (tab.showPortForwarding && !tab.__qpf_patched) {
                 tab.__qpf_patched = true
                 const orig = tab.showPortForwarding.bind(tab)
@@ -73,32 +98,24 @@ export default class QuickPortForwardModule {
                     return orig()
                 }
             }
+        }
 
-            // Patch prototype once
-            const proto = Object.getPrototypeOf(tab)
-            if (proto && proto.showPortForwarding && !proto.__qpf_proto_patched) {
-                proto.__qpf_proto_patched = true
-                const origProto = proto.showPortForwarding
-                proto.showPortForwarding = function() {
-                    const session = this.sshSession || (this.session && this.session.forwardedPorts !== undefined ? this.session : null)
-                    if (session) {
-                        openEnhancedModal(session)
-                        return
-                    }
-                    return origProto.apply(this, arguments)
-                }
+        // Hook existing and new tabs
+        const walk = (t: any) => {
+            if (!t) return
+            if (typeof t.getAllTabs === 'function') {
+                const inner = t.getAllTabs()
+                if (Array.isArray(inner)) inner.forEach(walk)
             }
+            hookTab(t)
         }
 
-        // Hook existing tabs
         if (Array.isArray(app.tabs)) {
-            app.tabs.forEach(tab => hookSshTab(tab))
+            app.tabs.forEach(walk)
         }
-
-        // Hook new tabs as they open
         if (app.tabOpened$) {
-            app.tabOpened$.subscribe(tab => {
-                setTimeout(() => hookSshTab(tab), 150)
+            app.tabOpened$.subscribe(t => {
+                setTimeout(() => walk(t), 200)
             })
         }
     }

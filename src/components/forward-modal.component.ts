@@ -7,34 +7,29 @@ import { PortForwardPreset } from '../types'
 @Component({
     selector: 'quick-port-forward-modal',
     template: `
-        <div class="modal-header border-secondary bg-dark py-2 px-3">
+        <div class="modal-header border-secondary py-2 px-3">
             <div class="d-flex align-items-center">
-                <i class="fas fa-network-wired text-primary me-2"></i>
-                <h6 class="m-0 fw-bold text-light">Encaminhamento de Portas (SSH)</h6>
-                <span class="badge bg-secondary bg-opacity-50 text-light ms-2 font-monospace" *ngIf="sessionHost">
+                <i class="fas fa-plug text-primary me-2"></i>
+                <h6 class="m-0 fw-bold">Encaminhamento de Portas</h6>
+                <span class="badge bg-secondary ms-2 font-monospace" *ngIf="sessionHost">
                     {{ sessionHost }}
                 </span>
             </div>
-            <button type="button" class="btn-close btn-close-white" (click)="activeModal.close()"></button>
+            <button type="button" class="btn-close" (click)="activeModal.close()"></button>
         </div>
 
-        <div class="modal-body p-3 bg-dark">
-            <!-- Navigation Tabs -->
-            <ul class="nav nav-pills nav-fill bg-black bg-opacity-40 p-1 rounded border border-secondary mb-3">
+        <div class="modal-body p-3">
+            <!-- Tabs -->
+            <ul class="nav nav-tabs border-secondary mb-3">
                 <li class="nav-item">
-                    <a class="nav-link py-1 px-3 text-light cursor-pointer" 
-                       [class.active]="activeTab === 'tunnels'" 
-                       (click)="activeTab = 'tunnels'">
-                        <i class="fas fa-list-ul me-1"></i>
+                    <a class="nav-link cursor-pointer" [class.active]="activeTab === 'tunnels'" (click)="activeTab = 'tunnels'">
                         Meus Túneis
                         <span class="badge bg-secondary ms-1" *ngIf="presets.length">{{ presets.length }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link py-1 px-3 text-light cursor-pointer" 
-                       [class.active]="activeTab === 'add'" 
-                       (click)="activeTab = 'add'">
-                        <i class="fas fa-plus-circle me-1"></i>
+                    <a class="nav-link cursor-pointer" [class.active]="activeTab === 'add'" (click)="activeTab = 'add'">
+                        <i class="fas fa-plus me-1"></i>
                         {{ isEditing ? 'Editar Túnel' : 'Adicionar Túnel' }}
                     </a>
                 </li>
@@ -44,48 +39,46 @@ import { PortForwardPreset } from '../types'
             <!-- TAB 1: MEUS TÚNEIS & TÚNEIS ATIVOS             -->
             <!-- ============================================== -->
             <div *ngIf="activeTab === 'tunnels'">
-                <!-- Active Tunnels Alert Section (if any active) -->
-                <div *ngIf="activeForwards.length > 0" class="active-tunnels-box p-3 rounded mb-3">
-                    <div class="d-flex align-items-center justify-content-between mb-2 pb-1 border-bottom border-success border-opacity-25">
-                        <span class="small fw-bold text-success text-uppercase">
-                            <i class="fas fa-plug fa-pulse me-1"></i> Túneis Ativos no Momento ({{ activeForwards.length }})
-                        </span>
+                <!-- Active Tunnels Section (if any active) -->
+                <div *ngIf="activeForwards.length > 0" class="card border-success border-opacity-50 mb-3 bg-dark">
+                    <div class="card-header border-success border-opacity-25 py-2 px-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-circle text-success me-2" style="font-size: 8px;"></i>
+                            <span class="small fw-bold text-success text-uppercase">Túneis Ativos no Momento ({{ activeForwards.length }})</span>
+                        </div>
                     </div>
-
-                    <div class="d-flex flex-column gap-2">
-                        <div *ngFor="let fw of activeForwards" 
-                             class="d-flex align-items-center justify-content-between p-2 rounded bg-black bg-opacity-40 border border-success border-opacity-25">
-                            <div class="d-flex align-items-center me-2">
-                                <div class="tunnel-icon-box me-2 text-success">
-                                    <quick-forward-icon [icon]="getForwardInfo(fw).icon" [size]="24"></quick-forward-icon>
+                    <div class="list-group list-group-flush">
+                        <div *ngFor="let fw of activeForwards" class="list-group-item bg-transparent border-secondary d-flex align-items-center justify-content-between py-2 px-3">
+                            <div class="d-flex align-items-center me-3 text-truncate">
+                                <div class="tunnel-icon me-3 text-success">
+                                    <quick-forward-icon [icon]="getForwardInfo(fw).icon" [size]="22"></quick-forward-icon>
                                 </div>
-                                <div>
+                                <div class="text-truncate">
                                     <div class="d-flex align-items-center gap-2">
-                                        <strong class="text-light fs-6">{{ getForwardInfo(fw).name }}</strong>
+                                        <strong class="fs-6 text-truncate">{{ getForwardInfo(fw).name }}</strong>
                                         <span class="badge bg-success" style="font-size: 10px;">Ativo</span>
                                     </div>
-                                    <div class="font-monospace text-light text-opacity-75" style="font-size: 12px;">
+                                    <div class="font-monospace text-muted small">
                                         {{ fw.host }}:{{ fw.port }} &rarr; {{ fw.targetAddress }}:{{ fw.targetPort }}
                                     </div>
                                 </div>
                             </div>
-
-                            <button class="btn btn-sm btn-danger py-0 px-2" (click)="stopForward(fw)">
+                            <button class="btn btn-sm btn-outline-danger" (click)="stopForward(fw)">
                                 <i class="fas fa-stop me-1"></i> Parar
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Search Filter -->
+                <!-- Search Input -->
                 <div class="input-group input-group-sm mb-3" *ngIf="presets.length > 0">
-                    <span class="input-group-text bg-black bg-opacity-50 border-secondary text-muted">
+                    <span class="input-group-text bg-transparent border-secondary text-muted">
                         <i class="fas fa-search"></i>
                     </span>
                     <input type="text" 
-                           class="form-control bg-black bg-opacity-50 border-secondary text-light" 
+                           class="form-control bg-transparent border-secondary" 
                            [(ngModel)]="searchQuery" 
-                           placeholder="Pesquisar por serviço ou porta (ex: postgres, 5432, mongo, redis)...">
+                           placeholder="Pesquisar por nome ou porta (ex: postgres, 5432, mongo, redis)...">
                     <button class="btn btn-outline-secondary" *ngIf="searchQuery" (click)="searchQuery = ''">
                         <i class="fas fa-times"></i>
                     </button>
@@ -93,149 +86,138 @@ import { PortForwardPreset } from '../types'
 
                 <!-- Empty State -->
                 <div *ngIf="presets.length === 0" class="text-center py-5 text-muted border border-secondary border-dashed rounded">
-                    <i class="fas fa-network-wired fa-2x mb-3 text-secondary opacity-50"></i>
+                    <i class="fas fa-network-wired fa-2x mb-3 opacity-50"></i>
                     <p class="mb-3 small">Nenhum túnel configurado ainda.</p>
                     <button class="btn btn-sm btn-primary" (click)="activeTab = 'add'">
-                        <i class="fas fa-plus me-1"></i> Adicionar do Catálogo ou Personalizado
+                        <i class="fas fa-plus me-1"></i> Adicionar Túnel
                     </button>
                 </div>
 
                 <!-- Presets List -->
-                <div class="d-flex flex-column gap-2" *ngIf="presets.length > 0">
+                <div class="list-group" *ngIf="presets.length > 0">
                     <div *ngFor="let preset of filteredPresets" 
-                         class="tunnel-card d-flex align-items-center justify-content-between p-2 px-3 rounded"
-                         [class.tunnel-card-active]="isForwarded(preset)">
+                         class="list-group-item list-group-item-action border-secondary d-flex align-items-center justify-content-between py-2 px-3"
+                         [class.border-success]="isForwarded(preset)">
                         
-                        <div class="d-flex align-items-center flex-grow-1 me-2 text-truncate">
-                            <div class="tunnel-icon-box me-3">
-                                <quick-forward-icon [icon]="preset.icon || ''" [size]="28"></quick-forward-icon>
+                        <div class="d-flex align-items-center flex-grow-1 me-3 text-truncate">
+                            <div class="tunnel-icon me-3">
+                                <quick-forward-icon [icon]="preset.icon || ''" [size]="24"></quick-forward-icon>
                             </div>
                             <div class="text-truncate">
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-bold text-light fs-6 text-truncate">{{ preset.name }}</span>
+                                    <strong class="fs-6 text-truncate">{{ preset.name }}</strong>
                                     <span class="badge" [class.bg-success]="isForwarded(preset)" [class.bg-secondary]="!isForwarded(preset)" style="font-size: 10px;">
                                         {{ isForwarded(preset) ? 'Ativo' : 'Parado' }}
                                     </span>
                                 </div>
-                                <div class="font-monospace text-muted" style="font-size: 12px;">
+                                <div class="font-monospace text-muted small">
                                     {{ preset.localHost || '127.0.0.1' }}:{{ preset.localPort }} &rarr; {{ preset.targetAddress }}:{{ preset.targetPort }}
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
+                        <!-- Actions -->
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             <button class="btn btn-sm"
                                     [class.btn-success]="!isForwarded(preset)"
                                     [class.btn-danger]="isForwarded(preset)"
                                     [disabled]="busyPresets.has(preset.id)"
                                     (click)="togglePreset(preset)">
-                                <i class="fas fa-spinner fa-spin me-1" *ngIf="busyPresets.has(preset.id)"></i>
                                 <i class="fas fa-play me-1" *ngIf="!isForwarded(preset) && !busyPresets.has(preset.id)"></i>
                                 <i class="fas fa-stop me-1" *ngIf="isForwarded(preset) && !busyPresets.has(preset.id)"></i>
                                 <span>{{ isForwarded(preset) ? 'Parar' : 'Iniciar' }}</span>
                             </button>
 
-                            <button class="btn btn-sm btn-outline-secondary py-1 px-2" (click)="editPreset(preset)" title="Editar">
+                            <button class="btn btn-sm btn-link text-muted" (click)="editPreset(preset)" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-outline-danger py-1 px-2" (click)="deletePreset(preset)" title="Excluir">
+                            <button class="btn btn-sm btn-link text-danger" (click)="deletePreset(preset)" title="Excluir">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div *ngIf="filteredPresets.length === 0 && searchQuery" class="text-center py-4 text-muted">
-                        <small>Nenhum serviço encontrado para "{{ searchQuery }}"</small>
+                    <div *ngIf="filteredPresets.length === 0 && searchQuery" class="text-center py-4 text-muted small">
+                        Nenhum serviço encontrado para "{{ searchQuery }}"
                     </div>
                 </div>
             </div>
 
             <!-- ============================================== -->
-            <!-- TAB 2: ADICIONAR TÚNEL / ESCOLHER DO CATÁLOGO   -->
+            <!-- TAB 2: ADICIONAR TÚNEL                         -->
             <!-- ============================================== -->
             <div *ngIf="activeTab === 'add'">
-                <!-- Catalog Quick Picker -->
-                <div class="catalog-picker p-3 rounded border border-secondary mb-3 bg-black bg-opacity-30">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="small fw-bold text-light">
-                            <i class="fas fa-cubes text-info me-1"></i> Escolher Serviço do Catálogo
-                        </span>
-                        <span class="small text-muted">Clique para preencher os dados</span>
-                    </div>
-
-                    <div class="catalog-chips-container d-flex flex-wrap gap-2" style="max-height: 120px; overflow-y: auto;">
-                        <button *ngFor="let item of catalogPresets" 
-                                type="button" 
-                                class="catalog-chip btn btn-sm btn-outline-secondary d-flex align-items-center gap-2 py-1 px-2 text-light"
-                                (click)="selectCatalogItem(item)">
-                            <quick-forward-icon [icon]="item.icon || ''" [size]="18"></quick-forward-icon>
-                            <span class="small">{{ item.name }}</span>
-                            <span class="font-monospace text-muted" style="font-size: 11px;">({{ item.localPort }})</span>
-                        </button>
-                    </div>
+                <!-- Clean Catalog Select Dropdown -->
+                <div class="mb-3" *ngIf="catalogPresets.length > 0">
+                    <label class="form-label small fw-bold">Preencher a partir do Catálogo Oficial:</label>
+                    <select class="form-select form-select-sm" (change)="onCatalogDropdownChange($event)">
+                        <option value="">Escolher serviço predefinido (PostgreSQL, Redis, MongoDB, Khomp, Docker...)...</option>
+                        <option *ngFor="let item of catalogPresets" [value]="item.id">
+                            {{ item.name }} (Porta padrão: {{ item.localPort }})
+                        </option>
+                    </select>
                 </div>
 
                 <!-- Custom Form -->
-                <div class="form-container p-3 rounded border border-secondary bg-black bg-opacity-20">
+                <div class="card bg-transparent border-secondary p-3">
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-light">Nome do Serviço</label>
-                            <input type="text" class="form-control form-control-sm bg-dark border-secondary text-light" 
+                            <label class="form-label small fw-bold">Nome do Serviço</label>
+                            <input type="text" class="form-control form-control-sm" 
                                    [(ngModel)]="formPreset.name" placeholder="ex: PostgreSQL, Redis, Khomp...">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-light">Tipo de Encaminhamento</label>
+                            <label class="form-label small fw-bold">Tipo de Encaminhamento</label>
                             <div class="btn-group btn-group-sm w-100">
-                                <input type="radio" class="btn-check" id="modalFwLocal" name="modalFwType" [value]="PortForwardType.Local" [(ngModel)]="formPreset.type">
-                                <label class="btn btn-outline-secondary" for="modalFwLocal">Local</label>
+                                <input type="radio" class="btn-check" id="fLocal" name="fType" [value]="PortForwardType.Local" [(ngModel)]="formPreset.type">
+                                <label class="btn btn-outline-secondary" for="fLocal">Local</label>
 
-                                <input type="radio" class="btn-check" id="modalFwRemote" name="modalFwType" [value]="PortForwardType.Remote" [(ngModel)]="formPreset.type">
-                                <label class="btn btn-outline-secondary" for="modalFwRemote">Remoto</label>
+                                <input type="radio" class="btn-check" id="fRemote" name="fType" [value]="PortForwardType.Remote" [(ngModel)]="formPreset.type">
+                                <label class="btn btn-outline-secondary" for="fRemote">Remoto</label>
 
-                                <input type="radio" class="btn-check" id="modalFwDynamic" name="modalFwType" [value]="PortForwardType.Dynamic" [(ngModel)]="formPreset.type">
-                                <label class="btn btn-outline-secondary" for="modalFwDynamic">SOCKS5</label>
+                                <input type="radio" class="btn-check" id="fDynamic" name="fType" [value]="PortForwardType.Dynamic" [(ngModel)]="formPreset.type">
+                                <label class="btn btn-outline-secondary" for="fDynamic">SOCKS5</label>
                             </div>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-3">
-                            <label class="form-label small fw-bold text-light">Host Local</label>
-                            <input type="text" class="form-control form-control-sm font-monospace bg-dark border-secondary text-light" 
+                            <label class="form-label small fw-bold">Host Local</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" 
                                    [(ngModel)]="formPreset.localHost" placeholder="127.0.0.1">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label small fw-bold text-light">Porta Local</label>
-                            <input type="number" class="form-control form-control-sm font-monospace bg-dark border-secondary text-light" 
+                            <label class="form-label small fw-bold">Porta Local</label>
+                            <input type="number" class="form-control form-control-sm font-monospace" 
                                    [(ngModel)]="formPreset.localPort" placeholder="5432">
                         </div>
                         <div class="col-md-6" *ngIf="formPreset.type !== PortForwardType.Dynamic">
-                            <label class="form-label small fw-bold text-light">Host e Porta de Destino</label>
+                            <label class="form-label small fw-bold">Host e Porta de Destino</label>
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control font-monospace bg-dark border-secondary text-light" 
+                                <input type="text" class="form-control font-monospace" 
                                        [(ngModel)]="formPreset.targetAddress" placeholder="127.0.0.1">
-                                <span class="input-group-text bg-dark border-secondary text-muted">:</span>
-                                <input type="number" class="form-control font-monospace bg-dark border-secondary text-light" 
+                                <span class="input-group-text">:</span>
+                                <input type="number" class="form-control font-monospace" 
                                        [(ngModel)]="formPreset.targetPort" placeholder="5432">
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-light">Descrição (Opcional)</label>
-                        <input type="text" class="form-control form-control-sm bg-dark border-secondary text-light" 
-                               [(ngModel)]="formPreset.description" placeholder="ex: Banco de dados de produção">
+                        <label class="form-label small fw-bold">Descrição (Opcional)</label>
+                        <input type="text" class="form-control form-control-sm" 
+                               [(ngModel)]="formPreset.description" placeholder="Descrição opcional">
                     </div>
 
-                    <!-- Clean SVG Upload & Preview -->
+                    <!-- Clean SVG Upload & FontAwesome Input -->
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-light">Ícone</label>
+                        <label class="form-label small fw-bold">Ícone do Serviço</label>
                         <div class="d-flex align-items-center gap-3">
-                            <div class="icon-preview-box rounded border border-secondary bg-black d-flex align-items-center justify-content-center text-light" 
-                                 style="width: 42px; height: 42px;">
-                                <quick-forward-icon [icon]="formPreset.icon || ''" [size]="28"></quick-forward-icon>
+                            <div class="icon-preview rounded border border-secondary p-1 d-flex align-items-center justify-content-center" 
+                                 style="width: 38px; height: 38px;">
+                                <quick-forward-icon [icon]="formPreset.icon || ''" [size]="24"></quick-forward-icon>
                             </div>
 
                             <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer">
@@ -243,22 +225,22 @@ import { PortForwardPreset } from '../types'
                                 <input type="file" accept=".svg,.png,.webp" class="d-none" (change)="onSvgUpload($event)">
                             </label>
 
-                            <input type="text" class="form-control form-control-sm bg-dark border-secondary text-light font-monospace flex-grow-1" 
+                            <input type="text" class="form-control form-control-sm font-monospace flex-grow-1" 
                                    [(ngModel)]="fontAwesomeInput" 
                                    (ngModelChange)="onFontAwesomeChange($event)" 
-                                   placeholder="Ou digite classe FontAwesome (ex: fas fa-database)...">
+                                   placeholder="Ou digite classe FontAwesome (ex: fas fa-database, fa-server)...">
                         </div>
                     </div>
 
-                    <!-- Actions -->
+                    <!-- Buttons -->
                     <div class="d-flex justify-content-end gap-2 pt-2 border-top border-secondary">
                         <button class="btn btn-sm btn-secondary" *ngIf="isEditing" (click)="cancelEdit()">
                             Cancelar
                         </button>
-                        <button class="btn btn-sm btn-outline-light" (click)="saveAsPreset()">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="saveAsPreset()">
                             <i class="fas fa-save me-1"></i> Salvar Predefinição
                         </button>
-                        <button class="btn btn-sm btn-success" (click)="startTunnelNow()">
+                        <button class="btn btn-sm btn-primary" (click)="startTunnelNow()">
                             <i class="fas fa-play me-1"></i> Iniciar Túnel Agora
                         </button>
                     </div>
@@ -266,10 +248,7 @@ import { PortForwardPreset } from '../types'
             </div>
         </div>
 
-        <div class="modal-footer border-secondary bg-dark py-2 px-3 d-flex justify-content-between">
-            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="openSettings()">
-                <i class="fas fa-cog me-1"></i> Configurações
-            </button>
+        <div class="modal-footer border-secondary py-2 px-3 d-flex justify-content-end">
             <button type="button" class="btn btn-secondary btn-sm" (click)="activeModal.close()">
                 Fechar
             </button>
@@ -277,43 +256,15 @@ import { PortForwardPreset } from '../types'
     `,
     styles: [`
         .cursor-pointer { cursor: pointer; }
-        .tunnel-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.15s ease;
-        }
-        .tunnel-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-        .tunnel-card-active {
-            background: rgba(40, 167, 69, 0.12) !important;
-            border-color: rgba(40, 167, 69, 0.45) !important;
-        }
-        .active-tunnels-box {
-            background: rgba(40, 167, 69, 0.08);
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
-        .tunnel-icon-box {
-            width: 36px;
-            height: 36px;
+        .tunnel-icon {
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
-            padding: 4px;
         }
-        .catalog-chip {
-            background: rgba(255, 255, 255, 0.03);
-            border-color: rgba(255, 255, 255, 0.1);
-            transition: all 0.15s ease;
-        }
-        .catalog-chip:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.3);
-            color: #fff !important;
+        .icon-preview {
+            background: rgba(0, 0, 0, 0.2);
         }
     `]
 })
@@ -435,19 +386,25 @@ export class QuickPortForwardModalComponent implements OnInit {
         }
     }
 
-    selectCatalogItem(item: PortForwardPreset): void {
-        this.formPreset = {
-            name: item.name,
-            type: item.type === 'remote' ? PortForwardType.Remote : (item.type === 'dynamic' ? PortForwardType.Dynamic : PortForwardType.Local),
-            localHost: item.localHost || '127.0.0.1',
-            localPort: item.localPort,
-            targetAddress: item.targetAddress || '127.0.0.1',
-            targetPort: item.targetPort,
-            description: item.description || '',
-            icon: item.icon || 'fas fa-plug',
+    onCatalogDropdownChange(event: any): void {
+        const id = event.target.value
+        if (!id) return
+        const item = this.catalogPresets.find(p => p.id === id)
+        if (item) {
+            this.formPreset = {
+                name: item.name,
+                type: item.type === 'remote' ? PortForwardType.Remote : (item.type === 'dynamic' ? PortForwardType.Dynamic : PortForwardType.Local),
+                localHost: item.localHost || '127.0.0.1',
+                localPort: item.localPort,
+                targetAddress: item.targetAddress || '127.0.0.1',
+                targetPort: item.targetPort,
+                description: item.description || '',
+                icon: item.icon || 'fas fa-plug',
+            }
+            this.fontAwesomeInput = ''
+            this.toastr.info(`Serviço ${item.name} selecionado.`)
         }
-        this.fontAwesomeInput = ''
-        this.toastr.info(`${item.name} selecionado. Ajuste as portas e salve.`)
+        event.target.value = ''
     }
 
     editPreset(preset: PortForwardPreset): void {
@@ -512,7 +469,7 @@ export class QuickPortForwardModalComponent implements OnInit {
                 this.fontAwesomeInput = ''
                 this.toastr.success('Ícone SVG carregado com sucesso!')
             } else {
-                this.formPreset.icon = `<img src="${content}" style="width:100%;height:100%;object-fit:contain;"/>`
+                this.formPreset.icon = content
                 this.fontAwesomeInput = ''
                 this.toastr.success('Imagem carregada!')
             }
@@ -594,10 +551,5 @@ export class QuickPortForwardModalComponent implements OnInit {
         } catch (err: any) {
             this.toastr.error(`Falha ao iniciar túnel: ${err.message || err}`)
         }
-    }
-
-    openSettings(): void {
-        this.activeModal.close()
-        window.location.hash = '#/settings/quick-port-forward'
     }
 }
