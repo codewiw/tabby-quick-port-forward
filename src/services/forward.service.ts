@@ -18,6 +18,27 @@ export interface ForwardedPortConfig {
     description: string
 }
 
+export function terminateForwardSockets(fw: any): void {
+    if (!fw) return
+
+    // 1. Close all active connections via native Node.js API (Node >= 18.2.0)
+    if (fw.listener && typeof fw.listener.closeAllConnections === 'function') {
+        try {
+            fw.listener.closeAllConnections()
+        } catch {}
+    }
+
+    // 2. Destroy all tracked sockets directly
+    if (fw.activeSockets) {
+        for (const s of fw.activeSockets) {
+            try {
+                s.destroy()
+            } catch {}
+        }
+        fw.activeSockets.clear()
+    }
+}
+
 export class QuickForwardedPort implements ForwardedPortConfig {
     type: PortForwardType = PortForwardType.Local
     host = '127.0.0.1'
@@ -26,17 +47,25 @@ export class QuickForwardedPort implements ForwardedPortConfig {
     targetPort: number
     description: string
     private listener: Server | null = null
+    activeSockets = new Set<Socket>()
 
     async startLocalListener(callback: (accept: () => Socket, reject: () => void, sourceAddress: string|null, sourcePort: number|null, targetAddress: string, targetPort: number) => void): Promise<void> {
         if (this.type === PortForwardType.Local) {
-            const listener = this.listener = createServer(s => callback(
-                () => s,
-                () => s.destroy(),
-                s.remoteAddress ?? null,
-                s.remotePort ?? null,
-                this.targetAddress,
-                this.targetPort,
-            ))
+            const listener = this.listener = createServer(s => {
+                this.activeSockets.add(s)
+                s.on('close', () => this.activeSockets.delete(s))
+                return callback(
+                    () => s,
+                    () => {
+                        this.activeSockets.delete(s)
+                        s.destroy()
+                    },
+                    s.remoteAddress ?? null,
+                    s.remotePort ?? null,
+                    this.targetAddress,
+                    this.targetPort,
+                )
+            })
             return new Promise((resolve, reject) => {
                 listener.listen(this.port, this.host)
                 listener.on('error', reject)
@@ -48,7 +77,14 @@ export class QuickForwardedPort implements ForwardedPortConfig {
                 return new Promise((resolve, reject) => {
                     this.listener = socksv5.createServer((info: any, acceptConnection: any, rejectConnection: any) => {
                         callback(
-                            () => acceptConnection(true),
+                            () => {
+                                const s = acceptConnection(true)
+                                if (s) {
+                                    this.activeSockets.add(s)
+                                    s.on('close', () => this.activeSockets.delete(s))
+                                }
+                                return s
+                            },
                             () => rejectConnection(),
                             null,
                             null,
@@ -69,6 +105,7 @@ export class QuickForwardedPort implements ForwardedPortConfig {
     }
 
     stopLocalListener(): void {
+        terminateForwardSockets(this)
         this.listener?.close()
     }
 
@@ -96,6 +133,40 @@ export function instantiateForwardedPort(config: Partial<ForwardedPortConfig>): 
 
     const instance = NativeClass ? new NativeClass() : new QuickForwardedPort()
     Object.assign(instance, config)
+
+    // Ensure active sockets are tracked and closed even if Tabby's native ForwardedPort is used
+    if (!instance.activeSockets) {
+        instance.activeSockets = new Set<Socket>()
+    }
+    const activeSockets: Set<Socket> = instance.activeSockets
+
+    const origStart = instance.startLocalListener
+    if (origStart && !instance._patchedForSocketTermination) {
+        instance.startLocalListener = async function (cb: any) {
+            return origStart.call(this, (accept: any, reject: any, ...args: any[]) => {
+                return cb(
+                    () => {
+                        const s = accept()
+                        if (s) {
+                            activeSockets.add(s)
+                            s.on('close', () => activeSockets.delete(s))
+                        }
+                        return s
+                    },
+                    reject,
+                    ...args,
+                )
+            })
+        }
+
+        const origStop = instance.stopLocalListener
+        instance.stopLocalListener = function () {
+            terminateForwardSockets(this)
+            origStop?.call(this)
+        }
+        instance._patchedForSocketTermination = true
+    }
+
     return instance
 }
 
@@ -157,7 +228,7 @@ export class QuickPortForwardService {
 
         const existing = this.getForwardForPreset(session, preset)
         if (existing) {
-            await session.removePortForward(existing)
+            await this.removeForward(session, existing)
             return false
         } else {
             const fwType = preset.type === 'remote' ? PortForwardType.Remote : (preset.type === 'dynamic' ? PortForwardType.Dynamic : PortForwardType.Local)
@@ -176,6 +247,7 @@ export class QuickPortForwardService {
 
     async removeForward(session: any, fw: any): Promise<void> {
         if (!session) return
+        terminateForwardSockets(fw)
         await session.removePortForward(fw)
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "tabby-quick-port-forward",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Quick SSH Port Forwarding with presets and service icons for Tabby",
   "keywords": [
     "tabby-plugin",
